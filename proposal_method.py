@@ -51,9 +51,9 @@ def honest_election(candidates, preference_profiles):
         
     return ranking, pd.DataFrame(elections).set_index(['Place','Round'], drop=True)
 
-def plot_elections(elections: pd.DataFrame):
+def plot_elections(elections: pd.DataFrame, title:str='Votes per Round'):
     plot = elections.plot(kind='bar')
-    plt.title('Votes per Round')
+    plt.title(title)
     plt.xlabel('Round')
     plt.ylabel('Votes')
     
@@ -78,12 +78,14 @@ if __name__ == "__main__":
     
     # rankings = generate_random_votes(15, candidates)
     
+    candidates = ['A', 'B', 'C']
+    rankings = [['A', 'B','C']] * 24 + [['C', 'A', 'B']] * 14 + [['C', 'B', 'A']] * 12
+    
     ranking, elections = honest_election(candidates, rankings)
     
     print(ranking)
     print(elections)
-    pd.DataFrame(rankings).to_csv('./rankings.csv')
-    elections.to_csv('./elections.csv')
-
+    # pd.DataFrame(rankings).to_csv('./data/rankings.csv', index=False)
+    # elections.to_csv('./data/elections.csv')
     
-    plot_elections(elections)
+    plot_elections(elections, title='Not Condorcet')

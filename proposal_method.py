@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
+from rankings import generate_random_votes
 
 # candidates: array of strings; list of candidate names
 # preference_profiles: array of arrays of strings; list of voters' preferences,
@@ -7,13 +9,20 @@ import numpy as np
 def honest_election(candidates, preference_profiles):
     ranking = []
     elections = []
+    place = 0
     
     while (len(ranking) < len(candidates)):
+        round = 0
+        place += 1
+        
         remaining_candidates = [c for c in candidates if c not in ranking]
         
         # run votes until only one candidates remains
         while (len(remaining_candidates) > 1):
-            counts = {c:0 for c in candidates}
+            round += 1
+            counts = {c:0 for c in remaining_candidates}
+            counts['Place'] = str(place)
+            counts['Round'] = str(round)
             for profile in preference_profiles:
                 votes = len(remaining_candidates)-1
                 i = 0
@@ -22,43 +31,35 @@ def honest_election(candidates, preference_profiles):
                         counts[profile[i]] += 1
                         votes -= 1
                     i += 1
+            # elections[round] = counts
             elections.append(counts)
             
             # remove candidate with least votes
             minimum_votes = min(counts[c] for c in remaining_candidates)
-            to_be_removed = []
             for candidate in counts:
                 if candidate in remaining_candidates and counts[candidate] == minimum_votes:
                     remaining_candidates.remove(candidate)
                 
-            
+        if (len(remaining_candidates) == 0):
+            print(ranking)
+            raise Exception("Tie")
+        
         ranking.append(remaining_candidates[0])
-    
-    return ranking, pd.DataFrame(elections)
+        
+        # elections[round] = {remaining_candidates[0] : len(preference_profiles)}
+        elections.append({remaining_candidates[0] : len(preference_profiles), 'Place': str(place), 'Round': 'W'})
+        
+    return ranking, pd.DataFrame(elections).set_index(['Place','Round'], drop=True)
 
-def plot_elections(elections):
-    import matplotlib.pyplot as plt
-    for c in elections.rows:
-        plt.plot(elections[c], label=c)
-    plt.legend()
+def plot_elections(elections: pd.DataFrame):
+    plot = elections.plot(kind='bar')
+    plt.title('Votes per Round')
     plt.xlabel('Round')
     plt.ylabel('Votes')
-    plt.title('Votes per Round')
+    
     plt.show()
     
-def generate_random_votes(n, candidates):
-    preferences = []
-    for _ in range(n):
-        remaining_candidates = [c for c in candidates]
-        vote = []
-        
-        while (remaining_candidates):
-            candidate = np.random.choice(remaining_candidates)
-            vote.append(candidate)
-            remaining_candidates.remove(candidate)
-        preferences.append(vote)
 
-    return preferences
 
 if __name__ == "__main__":
     candidates = ['A', 'B', 'C', 'D']
@@ -75,7 +76,14 @@ if __name__ == "__main__":
         ['D', 'C', 'B', 'A'],
     ]
     
+    # rankings = generate_random_votes(15, candidates)
+    
     ranking, elections = honest_election(candidates, rankings)
     
     print(ranking)
-    elections.to_csv('./elections.csv', index=False)
+    print(elections)
+    pd.DataFrame(rankings).to_csv('./rankings.csv')
+    elections.to_csv('./elections.csv')
+
+    
+    plot_elections(elections)

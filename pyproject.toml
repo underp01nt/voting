@@ -8,7 +8,7 @@ dependencies = [
     "matplotlib",
     "networkx",
 
-    "fastapi>=0.112.0",
+    "fastapi[standard]>=0.112.0",
     "uvicorn",
     "jinja2",
 ]

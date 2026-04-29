@@ -1,0 +1,14 @@
+[project]
+name = "project-air"
+version = "0.0.1"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy", 
+    "pandas",
+    "matplotlib",
+    "networkx",
+
+    "fastapi>=0.112.0",
+    "uvicorn",
+    "jinja2",
+]

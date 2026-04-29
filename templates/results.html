@@ -10,11 +10,18 @@
                <button style="position: fixed; top: 50px; right: 20px;" type="submit">Return to upload page</button>
           </form>
 
+          <br>
           {% for algorithm, results in results.items() %}
-               <h3>{{ algorithm }}</h3>
-               <p>Duration: {{ results.duration }} seconds</p>
+               <div class="title-center">
+                    <h3>{{ algorithm }}</h3>
+                    <p>Duration: {{ results.duration }} seconds</p>
+               </div>
+               
                <div class="dashboard-grid">
-                    <div class="panel">{{ results.fig | safe }}</div>
+                    <div class="panel">
+                         {{ results.fig | safe }}
+                         {{ results.heat | safe }}
+                    </div>
                </div>
 
           {% endfor %}

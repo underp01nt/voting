@@ -56,10 +56,16 @@
 
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    justify-content: center;
 }
 
 .panel {
+    display: flex;
     background: white;
     box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    align-items: center; 
+}
+
+.title-center {
+    text-align: center;
 }

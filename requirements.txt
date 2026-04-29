@@ -5,3 +5,4 @@ networkx
 fastapi[standard]>=0.112.0
 uvicorn
 jinja2
+plotly

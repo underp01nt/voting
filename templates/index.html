@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <link rel="stylesheet" href="/static/style.css">
+
+    <div class="index">
+        <h1>Project AIR</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="return validateAlgorithms()">
+            <div>
+                <label for="file">Upload CSV File:</label><br>
+                <input type="file" id="file" name="file" accept=".csv" required>
+            </div>
+
+            <br>
+
+            <div>
+                <label>Select at least one voting algorithm:</label><br>
+
+                <input type="checkbox" id="ranked_pairs" name="algorithms" value="ranked_pairs">
+                <label for="ranked_pairs">Ranked Pairs</label><br>
+
+            </div>
+
+            <br>
+
+            <button type="submit">Run</button>
+        </form>
+
+        <script>
+            function validateAlgorithms() {
+                const checkboxes = document.getElementsByName("algorithms");
+                const firstCheckbox = checkboxes[0];
+
+                for (let cb of checkboxes) {
+                    cb.addEventListener("change", () => {
+                        firstCheckbox.setCustomValidity("");
+                    });
+                }
+
+                let checked = Array.from(checkboxes).some(cb => cb.checked);
+
+                if (!checked) {
+                    firstCheckbox.setCustomValidity("Please choose an algorithm.");
+                    firstCheckbox.reportValidity();
+                    return false;
+                }
+
+                firstCheckbox.setCustomValidity("");
+                return true;
+            }
+
+        </script>
+    </div>
+</html>

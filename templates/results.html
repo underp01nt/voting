@@ -1,6 +1,57 @@
 <!DOCTYPE html>
 <html>
+     <link rel="stylesheet" href="/static/style.css">
+     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+     
      <body>
-        {{ results_A | safe }}
+          <button style="position: fixed; top: 20px; right: 20px;" onclick="openModal()">View Uploaded CSV</button>
+
+          <form action="/" method="get">
+               <button style="position: fixed; top: 50px; right: 20px;" type="submit">Return to upload page</button>
+          </form>
+
+          {% for algorithm, results in results.items() %}
+               <h3>{{ algorithm }}</h3>
+               <p>Duration: {{ results.duration }} seconds</p>
+               <div class="dashboard-grid">
+                    <div class="panel">{{ results.fig | safe }}</div>
+               </div>
+
+          {% endfor %}
      </body>
+
+     <div id="modal-overlay" class="overlay">
+          <div class="modal-box">
+               <button class="close-btn" onclick="closeModal()">×</button>
+
+               <h3>Preference Profile</h3>
+
+               <table cellpadding="5">
+                    <thead>
+                         <tr>
+                              <th>Voter</th>
+                              {% for i in range(votes[0]|length) %}
+                              <th>Rank {{ i + 1 }}</th>
+                              {% endfor %}
+                         </tr>
+                    </thead>
+                    <tbody>
+                         {% for vote in votes %}
+                         <tr>
+                              <td>{{ loop.index }}</td>
+                              {% for c in vote %}
+                              <td>{{ c }}</td>
+                              {% endfor %}
+                         </tr>
+                         {% endfor %}
+                    </tbody>
+               </table>
+
+          </div>
+     </div>
+
+     <script>
+          function openModal() { document.getElementById("modal-overlay").classList.add("active"); }
+          function closeModal() { document.getElementById("modal-overlay").classList.remove("active"); }
+     </script>
 </html>

@@ -2,7 +2,7 @@
 <html>
     <link rel="stylesheet" href="/static/style.css">
 
-    <body>
+    <div class="index">
         <h1>Project AIR</h1>
         <form action="/upload" method="post" enctype="multipart/form-data" onsubmit="return validateAlgorithms()">
             <div>
@@ -30,14 +30,13 @@
                 const checkboxes = document.getElementsByName("algorithms");
                 const firstCheckbox = checkboxes[0];
 
-                let checked = false;
-
                 for (let cb of checkboxes) {
-                    if (cb.checked) {
-                        checked = true;
-                        break;
-                    }
+                    cb.addEventListener("change", () => {
+                        firstCheckbox.setCustomValidity("");
+                    });
                 }
+
+                let checked = Array.from(checkboxes).some(cb => cb.checked);
 
                 if (!checked) {
                     firstCheckbox.setCustomValidity("Please choose an algorithm.");
@@ -50,6 +49,5 @@
             }
 
         </script>
-
-    </body>
+    </div>
 </html>

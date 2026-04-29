@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from plotly import graph_objects as go
 
 from io import StringIO
+from typing import Optional
 import csv, time
 
 app = FastAPI()
@@ -17,17 +18,23 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 def validate_client_csv_input(client_data: list[list[str]]) -> list[list[str]]:
     raise NotImplementedError()
 
-def build_rank_table(standings: list[str]) -> go.Figure:
-    rank_indices = list(range(1, len(standings) + 1))
-    return go.Figure(data=go.Table(
+def build_rank_table(votes: list[str]) -> go.Figure:
+    num_candidates = len(votes)
+    rank_indices = list(range(1, num_candidates + 1))
+    fig = go.Figure(data=go.Table(
         header=dict(values=["Rank", "Candidate"]),
-        cells=dict(values=[rank_indices, standings])
+        cells=dict(values=[rank_indices, votes])
     ))
+
+    fig.update_layout(title={"text": "Final Ranking", "x": 0.5}, height=180 + num_candidates * 30)
+    return fig
 
 #  handles client csv data, processes data based on selected algorithms, renders algorithm results
 #  args: (file: client csv data, algorithms: list of algorithms selected by client)
 @app.post("/upload")
-async def upload(request: Request, file: UploadFile=File(...), algorithms: list[str]=Form(...)):
+async def upload(request: Request, file: UploadFile=File(...), algorithms: Optional[list[str]]=Form(None)):
+    if not algorithms:
+        raise HTTPException(status_code=400, detail="Select at least one algorithm.")
 
     # make text reader iterable per row
     def parse_csv(text: str) -> list[list[str]]:
@@ -48,7 +55,7 @@ async def upload(request: Request, file: UploadFile=File(...), algorithms: list[
             end = time.time()
 
             fig = build_rank_table(ranked_pairs_result)
-            results["ranked_pairs"] = {
+            results["Ranked pairs"] = {
                 # "ranking": ranked_pairs_result,
                 "duration": end - start,
                 "fig": fig.to_html(full_html=False, config={"responsive": True}),
@@ -62,7 +69,8 @@ async def upload(request: Request, file: UploadFile=File(...), algorithms: list[
         request=request,
         name="results.html",
         context={
-            "results_A": results["ranked_pairs"]["fig"],
+            "results": results,
+            "votes": votes,
         })
 
 @app.get("/", response_class=HTMLResponse)

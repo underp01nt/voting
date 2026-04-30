@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from rankings import generate_random_votes
+from votingutils import generate_random_votes
 
 # Basically a topological sort of the DAG, except it might not be
 # connected and what even are vertices?
@@ -13,23 +13,25 @@ def topological_sort(vertices:list, edges:list):
     if not start:
         raise Exception("Full Cycle")
     
-    final = []
+    final_vertices = []
+    final_edges =[]
     remaining_edges = edges.copy()
     while start:
         node = start.pop()
-        final.append(node)
+        final_vertices.append(node)
         for edge in remaining_edges.copy():
             if edge[0] == node:
+                final_edges.append(edge)
                 remaining_edges.remove(edge)
                 indegrees[edge[1]] -= 1
                 if indegrees[edge[1]] == 0:
                     start.insert(0, edge[1])
         # print(indegrees)
     
-    if len(final) < len(vertices):
+    if len(final_vertices) < len(vertices):
         raise Exception("Embedded Cycle")
                 
-    return final, edges
+    return final_vertices, final_edges
 
 def ranked_pairs(candidates:list, votes:list):
     pairs = {

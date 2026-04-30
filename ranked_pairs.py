@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from votingutils import generate_random_votes
+from votingutils import pairwise_comparison
 
 # Basically a topological sort of the DAG, except it might not be
 # connected and what even are vertices?
@@ -34,14 +34,7 @@ def topological_sort(vertices:list, edges:list):
     return final_vertices, final_edges
 
 def ranked_pairs(candidates:list, votes:list):
-    pairs = {
-        (a, b) : 0 for a in candidates for b in candidates if a != b
-        }
-    
-    for vote in votes:
-        for i in range(len(vote)-1):
-            for j in range(i+1, len(vote)):
-                pairs[(vote[i], vote[j])] += 1
+    pairs = pairwise_comparison(candidates, votes)
     
     sorted_pairs = sorted(pairs.items(), key=lambda x: x[1], reverse=True)
     sorted_wins = sorted_pairs[:len(sorted_pairs)//2]

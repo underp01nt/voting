@@ -1,21 +1,7 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
-
-# candidates: array of candidate names, 
-# votes: array of rankings (arrays of candidate names in order of preference)
-# returns a dict of *all* pairwise (order dependent) vote totals
-def pairwise_comparison(candidates:list, votes:list):
-    pairs = {
-        (a, b) : 0 for a in candidates for b in candidates if a != b
-        }
-    
-    for vote in votes:
-        for i in range(len(vote)-1):
-            for j in range(i+1, len(vote)):
-                pairs[(vote[i], vote[j])] += 1
-                
-    return pairs
+from votingutils import generate_random_votes, pairwise_comparison
 
 # Returns a NetworkX graph of pairwise comparisons with edges labeled by win strength
 def beat_graph(candidates:list, votes:list):
@@ -28,7 +14,7 @@ def beat_graph(candidates:list, votes:list):
     return graph
 
 # draws the graph of pairwise victories with matplotlib
-def draw_beat_graph(candidates:list, votes:list):
+def draw_beat_graph(candidates:list, votes:list, display=False, block=True):
     graph = beat_graph(candidates, votes)
     # indegrees = {c : 0 for c in candidates}
     # for edge in graph.edges:
@@ -57,6 +43,8 @@ def draw_beat_graph(candidates:list, votes:list):
         rotate=False
         # connectionstyle='arc3, rad = 0.1'
         )
+    if display:
+        plt.show(block=block)
     
 if __name__ == "__main__":
     candidates = ['A', 'B', 'C', 'D']
@@ -73,7 +61,6 @@ if __name__ == "__main__":
         ['D', 'C', 'B', 'A'],
     ]
     
-    from votingutils import generate_random_votes
     rankings = generate_random_votes(candidates, 50)
     
     # candidates = ['A', 'B', 'C']
@@ -86,6 +73,16 @@ if __name__ == "__main__":
     # candidates = ['A', 'B', 'C']
     # rankings = [['A', 'C','B']] * 40 + [['B', 'C', 'A']] * 30 + [['B', 'A', 'C']] * 30
     
-    draw_beat_graph(candidates, rankings)
+    # draw_beat_graph(candidates, rankings)
+    
+    # candidates_1 = ['A', 'B', 'C']
+    # rankings_1 = [['A', 'B','C']] * 52 + [['C', 'B', 'A']] * 48
+    
+    candidates_2 = ['A', 'B', 'C', 'b']
+    rankings_2 = [['A', 'B', 'b', 'C']] * 26 + [['A', 'b', 'B', 'C']] * 26 + [['C', 'B', 'b', 'A']] * 24 + [['C', 'b', 'B', 'A']] * 24
+
+    # draw_beat_graph(candidates_1, rankings_1)
+    draw_beat_graph(candidates_2, rankings_2)
+    
     plt.show()
 

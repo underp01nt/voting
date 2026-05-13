@@ -6,7 +6,7 @@
      <body>
           <button style="position: fixed; top: 20px; right: 20px;" onclick="openModal()">View Uploaded CSV</button>
 
-          <form action="/" method="get">
+          <form action="/test" method="get">
                <button style="position: fixed; top: 50px; right: 20px;" type="submit">Return to upload page</button>
           </form>
 
@@ -37,17 +37,17 @@
                     <thead>
                          <tr>
                               <th>Voter</th>
-                              {% for i in range(votes[0]|length) %}
+                              {% for i in range(ballots[0]|length) %}
                               <th>Rank {{ i + 1 }}</th>
                               {% endfor %}
                          </tr>
                     </thead>
                     <tbody>
-                         {% for vote in votes %}
+                         {% for ballot in ballots %}
                          <tr>
                               <td>{{ loop.index }}</td>
-                              {% for c in vote %}
-                              <td>{{ c }}</td>
+                              {% for c in ballot %}
+                                   <td>{{ c }}</td>
                               {% endfor %}
                          </tr>
                          {% endfor %}

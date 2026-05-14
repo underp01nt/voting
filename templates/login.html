@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Login - Project AIR</title>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Sign In</h1>
+            <p class="subtitle">Enter your access token to continue</p>
+            <hr class="gov-divider">
+            <form action="/login" method="post" class="gov-form">
+                <div class="form-group">
+                    <label for="token">Access Token</label>
+                    <input type="text" id="token" name="token" required class="gov-input">
+                </div>
+                <button type="submit" class="btn btn-primary btn-wide">Sign In</button>
+            </form>
+            <div class="auth-footer">
+                <a href="/auth" class="back-link">← Back to Authentication Options</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

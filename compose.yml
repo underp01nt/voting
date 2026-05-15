@@ -1,0 +1,34 @@
+services:
+  web:
+    build: .
+    ports: 
+      - 8000:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - election_authority_db
+      # - votes_db
+    
+  election_authority_db:
+    image: postgres:17
+    ports: 
+      - 5432:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: election_authority
+    volumes:
+      - election_authority_data:/var/lib/postgresql/data
+      # mount SQL init for authority DB auto-load
+      - ./db/authority_seed.sql:/docker-entrypoint-initdb.d/seed.sql  
+
+  # votes_db:
+  #   image: postgres:17
+  #   ports:
+  #     - 5432:5432
+  #   volumes:
+  #     - votes_data:/var/lib/postgresql/data
+
+volumes:
+  election_authority_data:
+  votes_data:

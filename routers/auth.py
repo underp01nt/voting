@@ -1,16 +1,27 @@
-'''
+from fastapi import APIRouter, Form, Depends
+from fastapi.templating import Jinja2Templates
 
-    Elections DB
-    ... | eligibility_state
-            unoffered
+router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
-    Auth DB
-    hashed_token | payload
+class TokenRequestForm:
+    def __init__(self, 
+                 name: str = Form(...), 
+                 address: str = Form(...),
+                 dob: str = Form(...),
+                 ssn4: str = Form(...),
+                 ):
+        self.name = name
+        self.address = address
+        self.dob = dob
+        self.ssn4 = ssn4
 
-'''
-
-class VoterBallotAuth():
-    hash_token: str
-    payload: str
-
-if __name__ == "__main__": pass
+# TODO: perform sql query on mock authority DB before presenting token gen prompt
+@router.post("/submit-request")
+def submit_token_request(form: TokenRequestForm = Depends()):
+    return {
+        "name": form.name, 
+        "address": form.address, 
+        "dob": form.dob, 
+        "ssn4": form.ssn4
+    }

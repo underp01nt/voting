@@ -1,58 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="/static/js/cast.js"></script>
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
     <title>Cast Ballot - Project AIR</title>
-    <style>
-        .voting-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-top: 20px;
-        }
-        .candidate-card {
-            background: #fff;
-            border: 1px solid #d6d7d9;
-            padding: 15px;
-            margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .cart-section {
-            background: #f0f6fa;
-            padding: 20px;
-            border: 2px dashed #005ea2;
-        }
-        .ballot-item {
-            background: #005ea2;
-            color: white;
-            padding: 10px;
-            margin-bottom: 5px;
-            border-radius: 4px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .remove-btn {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .payload-preview {
-            margin-top: 20px;
-            background: #1b1b1b;
-            color: #00ff00;
-            padding: 15px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            border-radius: 4px;
-        }
-    </style>
 </head>
 <body>    
     <div class="index" style="height: auto; padding: 40px; align-items: stretch;"> 
@@ -69,9 +23,6 @@
                     </div>
                 </div>
 
-                <div id="candidate-list">
-                    <p class="text-muted" style="font-size: 0.9rem; color: #565c65;">Search for candidates above to add them to your approval list.</p>
-                </div>
             </div>
 
             <div class="cart-column">
@@ -86,92 +37,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        const allCandidates = [
-            "Candidate Alpha", "Candidate Beta", "Candidate Gamma", "Candidate Delta",
-            "Senator Epsilon", "Representative Zeta", "Governor Eta", "Mayor Theta"
-        ];
-        let cart = [];
-
-        function showDropdown() {
-            document.getElementById('search-dropdown').style.display = 'block';
-            filterCandidates();
-        }
-
-        function hideDropdown() {
-            // Delay hide to allow click to register
-            setTimeout(() => {
-                document.getElementById('search-dropdown').style.display = 'none';
-            }, 200);
-        }
-
-        function filterCandidates() {
-            const input = document.getElementById('candidate-search');
-            const filter = input.value.toUpperCase();
-            const dropdown = document.getElementById('search-dropdown');
-            
-            const filtered = allCandidates.filter(c => 
-                c.toUpperCase().includes(filter) && !cart.includes(c)
-            );
-
-            dropdown.innerHTML = '';
-            if (filtered.length === 0) {
-                dropdown.innerHTML = '<div style="padding: 10px; color: #666;">No candidates found</div>';
-            } else {
-                filtered.forEach(candidate => {
-                    const div = document.createElement('div');
-                    div.style.padding = '10px';
-                    div.style.cursor = 'pointer';
-                    div.style.borderBottom = '1px solid #eee';
-                    div.textContent = candidate;
-                    div.onmousedown = () => { // Use onmousedown to fire before onblur
-                        addToCart(candidate);
-                        input.value = '';
-                    };
-                    div.onmouseover = () => { div.style.background = '#f0f6fa'; };
-                    div.onmouseout = () => { div.style.background = 'white'; };
-                    dropdown.appendChild(div);
-                });
-            }
-        }
-
-        function addToCart(candidate) {
-            if (cart.includes(candidate)) return;
-            cart.push(candidate);
-            renderCart();
-            filterCandidates();
-        }
-
-        function removeFromCart(candidate) {
-            cart = cart.filter(c => c !== candidate);
-            renderCart();
-            filterCandidates();
-        }
-
-        function renderCart() {
-            const cartDiv = document.getElementById('cart');
-            const actionContainer = document.getElementById('action-container');
-
-            if (cart.length === 0) {
-                cartDiv.innerHTML = '<p id="empty-msg">No candidates selected. Your ranking will appear here.</p>';
-                actionContainer.style.display = 'none';
-                return;
-            }
-
-            actionContainer.style.display = 'block';
-            cartDiv.innerHTML = '';
-            
-            cart.forEach((candidate, index) => {
-                const item = document.createElement('div');
-                item.className = 'ballot-item';
-                item.innerHTML = `
-                    <span>${candidate}</span>
-                    <button class="remove-btn" onclick="removeFromCart('${candidate}')">✕</button>
-                `;
-                cartDiv.appendChild(item);
-            });
-        }
-    </script>
 </body>
 </html>

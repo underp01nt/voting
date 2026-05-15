@@ -1,3 +1,9 @@
+body {     
+    user-select: none;
+    -webkit-user-select: none; 
+    -ms-user-select: none;
+}
+
 .index {
     display: flex;
     flex-direction: column;
@@ -240,4 +246,60 @@
 
 .nav-link:hover {
     text-decoration: underline;
+}
+
+.voting-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 20px;
+}
+.candidate-card {
+    background: #fff;
+    border: 1px solid #d6d7d9;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.cart-section {
+    background: #f0f6fa;
+    padding: 20px;
+    border: 2px dashed #005ea2;
+}
+.ballot-item {
+    background: #005ea2;
+    color: white;
+    padding: 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+}
+.remove-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+.payload-preview {
+    margin-top: 20px;
+    background: #1b1b1b;
+    color: #00ff00;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    white-space: pre-wrap;
+    border-radius: 4px;
+}
+
+.gov-textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.short-input {
+    max-width: 160px;
 }

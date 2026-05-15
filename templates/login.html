@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="/static/js/login.js"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,18 +10,39 @@
 <body>
     <div class="auth-container">
         <div class="auth-card">
-            <h1>Sign In</h1>
+            <h1>Sign in to Project AIR</h1>
             <p class="subtitle">Enter your access token to continue</p>
             <hr class="gov-divider">
             <form action="/login" method="post" class="gov-form">
                 <div class="form-group">
                     <label for="token">Access Token</label>
-                    <input type="text" id="token" name="token" required class="gov-input">
+                    <div style="position: relative; display: inline-block; width: 100%;">
+                        <input type="password" id="token" name="token" required class="gov-input" style="padding-right: 2.5em;">
+                        <button type="button" id="toggleToken"
+                                style="
+                                position: absolute;
+                                right: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                background: none;
+                                border: none;
+                                cursor: pointer;
+                                padding: 0;
+                                display: flex;
+                                align-items: center;
+                                color: #666;
+                                ">
+                            <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-wide">Sign In</button>
             </form>
             <div class="auth-footer">
-                <a href="/auth" class="back-link">← Back to Authentication Options</a>
+                <a href="/" class="back-link">← Go back</a>
             </div>
         </div>
     </div>

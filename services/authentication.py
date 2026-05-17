@@ -1,11 +1,11 @@
-from db.factory import get_election_authority_connection
+from fastapi import Request
 
-# returns status indicating token registration eligibility
-def verify_voter(name: str, address: str, dob: str, ssn4: str, db) -> str:
+# check eligibility status for token registration 
+def verify_voter(request: Request, db, name: str, address: str, dob: str, ssn4: str):
     cursor = db.cursor()
     cursor.execute(
         """
-            SELECT eligibility_verified 
+            SELECT eligibility_used
             FROM voters
             WHERE name = %s AND address = %s AND dob = %s AND ssn4 = %s
         """, 
@@ -14,16 +14,26 @@ def verify_voter(name: str, address: str, dob: str, ssn4: str, db) -> str:
 
     row = cursor.fetchone()
 
-    #  0: no records founds,  1: eligible,  2: not eligible
     if row is None: return "no records found"
 
     if not row[0]:
-        # TODO: flip eligibility_verified
-        return "token generation ability granted"
+        cursor.execute(
+            """
+                UPDATE voters
+                SET eligibility_used = TRUE
+                WHERE name = %s AND address = %s AND dob = %s AND ssn4 = %s
+            """, 
+            (name, address, dob, ssn4)
+        )
+        
+        db.commit()
+
+        request.session["allowed_token"] = True
+        return "valid eligibility"
     
     else: return "eligibility already used"
 
-if __name__ == "__main__":
-    db = get_election_authority_connection()
-    assert verify_voter('Alice Johnson', '123 Main Street', '1995-04-12', '1111', db) == 1
-    assert verify_voter('Alice', '123 Main Street', '1995-04-12', '1111', db) == 0
+# if __name__ == "__main__":
+    # db = get_election_authority_connection()
+    # assert verify_voter('Alice Johnson', '123 Main Street', '1995-04-12', '1111', db) == 1
+    # assert verify_voter('Alice', '123 Main Street', '1995-04-12', '1111', db) == 0

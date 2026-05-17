@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Form, Depends
+from fastapi import APIRouter, Form, Depends, Request
+from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from db.factory import get_election_authority_db
 from services.authentication import verify_voter
@@ -19,10 +20,10 @@ class TokenRequestForm:
         self.ssn4 = ssn4
 
 @router.post("/submit-request")
-def submit_token_request(form: TokenRequestForm = Depends(), db = Depends(get_election_authority_db)):
-    request_status = verify_voter(form.name, form.address, form.dob, form.ssn4, db)
-    # TODO: make templates for these eligibility cases
-    match request_status: 
-        case "valid eligibility": return {"status_code": 0}  # successful redirect to token gen page
+def submit_token_request(request: Request, form: TokenRequestForm = Depends(), db = Depends(get_election_authority_db)):
+    eligibility_state = verify_voter(request, db, form.name, form.address, form.dob, form.ssn4)
+    # TODO: make templates for each eligibility case
+    match eligibility_state: 
+        case "valid eligibility": return RedirectResponse(url="/token", status_code=303) 
         case "eligibility already used": return {"status_code": -1}  
         case _: return {"status_code": 2}  # no records matched

@@ -18,6 +18,7 @@ dependencies = [
     "psycopg2-binary",
     "requests",
     "python-dotenv",
+    "itsdangerous",   # FastAPI session middleware dependency
 ]
 
 [tool.setuptools.packages.find]

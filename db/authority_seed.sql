@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS voters (
     address TEXT NOT NULL,
     dob DATE NOT NULL,
     ssn4 VARCHAR(4) NOT NULL,
-    eligibility_verified BOOLEAN DEFAULT FALSE 
+    eligibility_used BOOLEAN DEFAULT FALSE 
 );
 
 /* some AI generated entry samples */ 

@@ -19,6 +19,8 @@ dependencies = [
     "requests",
     "python-dotenv",
     "itsdangerous",   # FastAPI session middleware dependency
+    "pydantic",
+    "cryptography",
 ]
 
 [tool.setuptools.packages.find]

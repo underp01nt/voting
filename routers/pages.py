@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi import APIRouter, Request 
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from typing import Optional
 
@@ -48,3 +48,13 @@ async def request_token(request: Request, verification_type: Optional[str] = Non
             "verification_type": verification_type
         }
     )
+
+@router.get("/token", response_class=HTMLResponse)
+async def token(request: Request):
+    if request.session.pop("allowed_token", None):
+        return templates.TemplateResponse(
+            request=request,
+            name="token.html"
+        )
+    
+    return RedirectResponse("/", status_code=303)

@@ -22,8 +22,17 @@ class TokenRequestForm:
 @router.post("/submit-request")
 def submit_token_request(request: Request, form: TokenRequestForm = Depends(), db = Depends(get_election_authority_db)):
     eligibility_state = verify_voter(request, db, form.name, form.address, form.dob, form.ssn4)
-    # TODO: make templates for each eligibility case
     match eligibility_state: 
         case "valid eligibility": return RedirectResponse(url="/token", status_code=303) 
-        case "eligibility already used": return {"status_code": -1}  
-        case _: return {"status_code": 2}  # no records matched
+        case "eligibility already used": error_msg, status_code = "This user has already registered for a token", 400   # bad request
+        case _: error_msg, status_code = "This user is not eligible for registration", 404     # not found
+
+    return templates.TemplateResponse(
+            request=request,
+            name="verify-form.html",
+            context={
+                "verification_type": "manual",
+                "error": error_msg,
+            },
+            status_code=status_code
+        )

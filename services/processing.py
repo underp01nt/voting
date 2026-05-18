@@ -27,3 +27,16 @@ def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
     }
 
     return results
+
+def insert_blinded_token_hash(db, blinded_token_hash: str):
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+            INSERT INTO ballots (hashed_token)
+            VALUES (%s)
+        """,
+        (blinded_token_hash,)
+    )
+
+    db.commit()

@@ -1,7 +1,18 @@
-// placeholder public key, to be fetched from backend
-const RSA_N = BigInt("9516311845790656153499716760847001433441357"); 
+
+let RSA_N = BigInt("9516311845790656153499716760847001433441357");
 const RSA_E = 65537n;
 
+async function loadPublicKey() {
+    const res = await fetch("/public-key");
+    const data = await res.json();
+
+    RSA_N = BigInt(data.n);
+}
+
+(async () => {
+    await loadPublicKey();
+    console.log("RSA loaded:", RSA_N);
+}) ();
 
 function bytesToBigInt(bytes) {
     return BigInt(
@@ -74,7 +85,15 @@ function modInverse(a, m) {   // considering a * x ≡ 1 (mod m), this computes 
     return x;
 }
 
-async function getUnblindedCredential(token) {
+// helper method to mask credential output
+function maskCredential(str) {
+    const visible = 4;
+    const max_asterisk_count = 20
+    
+    return str.slice(0, visible) + "*".repeat(max_asterisk_count);
+}
+
+async function sendBlindedCredential(token) {
     /* begin token blinding */
     const encoder = new TextEncoder();
     const tokenBytes = encoder.encode(token);
@@ -131,8 +150,8 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/\//g, "_")   // replace /
             .replace(/=+$/, "");   // replace trailing ='s at end
 
-        // use raw token to get unblinded, signed credential
-        const credential = await getUnblindedCredential(token); console.log(credential);
+        // send blinded credential, unblind it back to get original token
+        const credential = await sendBlindedCredential(token); console.log("credential is %s", credential);
 
         /* Animation phase */
         generationView.classList.add("slide-up");
@@ -143,7 +162,8 @@ document.addEventListener("DOMContentLoaded", () => {
             tokenResultView.classList.remove("hidden");
             tokenResultView.classList.add("fade-in");
 
-            generatedToken.innerText = credential;
+            fullCredential = credential;
+            generatedToken.innerText = maskCredential(credential);
             tokenCard.classList.add("token-generated");
         }, 500);
 
@@ -151,9 +171,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     copyBtn.addEventListener("click", async () => {
-        const token = generatedToken.innerText;
+        await navigator.clipboard.writeText(fullCredential);
 
-        await navigator.clipboard.writeText(token);
         copyBtn.innerText = "Copied to clipboard!";
         copyBtn.classList.add("copy-success-btn");
 

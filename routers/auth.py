@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Form, Depends, Request
+from fastapi import APIRouter, Form, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from db.factory import get_election_authority_db
-from services.authentication import verify_voter
+from db.factory import get_election_authority_db, get_votes_db
+from services.authentication import verify_voter, is_blinded_token_hash_unique
 from pydantic import BaseModel
-from services import crypto
+from services import crypto, processing
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -42,14 +42,30 @@ def submit_token_request(request: Request, form: TokenRequestForm = Depends(), d
             status_code=status_code
         )
 
+@router.get("/public-key")
+def get_public_key():
+    return {
+        "n": str(crypto.n),
+        "e": str(crypto.e)
+    }
+
 @router.post("/blind-sign")
-def blind_sign(request: Request, payload: BlindSignRequest):
+def blind_sign(payload: BlindSignRequest, db = Depends(get_votes_db)):
     blinded_token = payload.blinded_token
     
     # hash the blinded token
-    blinded_token_hash =  crypto.hash_blinded_token(blinded_token)
+    try:
+        blinded_token_hash: str = crypto.hash_blinded_token(blinded_token)
 
-    # TODO: check hash for duplicate, store in votes_db
+        # check if blinded token hash already in votes_db before insertion
+        if not is_blinded_token_hash_unique(db, blinded_token_hash):    
+            raise RuntimeError("Token already registered")
+        else:
+            processing.insert_blinded_token_hash(db, blinded_token_hash)
+        
+        # sign blinded token
+        blinded_signature = crypto.sign_blinded_token(blinded_token)
+        return {"blinded_signature": blinded_signature}
 
-    blinded_signature = crypto.sign_blinded_token(blinded_token)
-    return {"blinded_signature": blinded_signature}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

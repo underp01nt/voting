@@ -22,12 +22,17 @@ services:
       # mount SQL init for authority DB auto-load
       - ./db/authority_seed.sql:/docker-entrypoint-initdb.d/seed.sql  
 
-  # votes_db:
-  #   image: postgres:17
-  #   ports:
-  #     - 5432:5432
-  #   volumes:
-  #     - votes_data:/var/lib/postgresql/data
+  votes_db:
+    image: postgres:17
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: votes
+    volumes:
+      - votes_data:/var/lib/postgresql/data
+      - ./db/votes_seed.sql:/docker-entrypoint-initdb.d/seed.sql
 
 volumes:
   election_authority_data:

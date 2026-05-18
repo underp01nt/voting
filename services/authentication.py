@@ -33,6 +33,20 @@ def verify_voter(request: Request, db, name: str, address: str, dob: str, ssn4: 
     
     else: return "eligibility already used"
 
+def is_blinded_token_hash_unique(db, blinded_token_hash: str):
+    cursor = db.cursor()
+    cursor.execute(
+        """
+            SELECT hashed_token
+            FROM ballots
+            WHERE hashed_token = %s
+        """,
+        (blinded_token_hash,)
+    )
+
+    row = cursor.fetchone()
+    return row is None
+
 # if __name__ == "__main__":
     # db = get_election_authority_connection()
     # assert verify_voter('Alice Johnson', '123 Main Street', '1995-04-12', '1111', db) == 1

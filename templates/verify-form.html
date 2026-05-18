@@ -33,6 +33,12 @@
                     <label for="ssn4">Last 4 Digits of SSN</label>
                     <input type="password" id="ssn4" name="ssn4" required maxlength="4" pattern="[0-9]{4}" inputmode="numeric" class="gov-input short-input">
                 </div>
+                
+                {% if error %}
+                    <div class="alert alert-error">
+                        <strong>Error:</strong> {{ error }}
+                    </div>
+                {% endif %}
 
                 <button type="submit" class="btn btn-primary btn-wide">Submit Request</button>
             </form>

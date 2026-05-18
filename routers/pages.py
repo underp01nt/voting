@@ -58,3 +58,10 @@ async def token(request: Request):
         )
     
     return RedirectResponse("/", status_code=303)
+
+@router.get("/test-token", response_class=HTMLResponse)
+async def get_token(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="token.html",
+    )

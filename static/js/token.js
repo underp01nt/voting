@@ -1,5 +1,5 @@
 
-let RSA_N = BigInt("9516311845790656153499716760847001433441357");
+let RSA_N;
 const RSA_E = 65537n;
 
 async function loadPublicKey() {
@@ -95,13 +95,14 @@ function maskCredential(str) {
 
 async function sendBlindedCredential(token) {
     /* begin token blinding */
-    const encoder = new TextEncoder();
-    const tokenBytes = encoder.encode(token);
-    const tokenInt = bytesToBigInt(tokenBytes);
 
-    const r = generateBlindingFactor(RSA_N);
+    // hash the token and encode it as an int
+    const encoder = new TextEncoder();
+    const tokenBuffer = await crypto.subtle.digest("SHA-256", encoder.encode(token));  
+    const tokenInt = bytesToBigInt(new Uint8Array(tokenBuffer));
 
     // blind the token
+    const r = generateBlindingFactor(RSA_N);
     const blindedToken = (tokenInt * modPow(r, RSA_E, RSA_N)) % RSA_N;
 
     // send blinded token for signing, should receive signed, blinded signature
@@ -115,11 +116,11 @@ async function sendBlindedCredential(token) {
 
     const blindedSignature = BigInt(data.blinded_signature);
 
-    // unblind the signature
+    // we want to unblind the signature
     const rInverse = modInverse(r, RSA_N);
     const unblindedSignature = (blindedSignature * rInverse) % RSA_N;
 
-    // combine token and signature
+    // combine token and signature as one credential that voter can copy
     const credential = `${token}.${unblindedSignature.toString()}`;
 
     return credential
@@ -150,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/\//g, "_")   // replace /
             .replace(/=+$/, "");   // replace trailing ='s at end
 
-        // send blinded credential, unblind it back to get original token
+        // send blinded token, unblind sent signature to get a valid signature --> combine raw token + signature for credential
         const credential = await sendBlindedCredential(token); console.log("credential is %s", credential);
 
         /* Animation phase */

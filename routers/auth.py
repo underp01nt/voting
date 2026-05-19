@@ -24,6 +24,10 @@ class TokenRequestForm:
 class BlindSignRequest(BaseModel):
     blinded_token: str
 
+class VoterCredential(BaseModel):  # signed token must have signature
+    token: str
+    signature: str
+
 @router.post("/submit-request")
 def submit_token_request(request: Request, form: TokenRequestForm = Depends(), db = Depends(get_election_authority_db)):
     eligibility_state = verify_voter(request, db, form.name, form.address, form.dob, form.ssn4)
@@ -53,19 +57,21 @@ def get_public_key():
 def blind_sign(payload: BlindSignRequest, db = Depends(get_votes_db)):
     blinded_token = payload.blinded_token
     
-    # hash the blinded token
+    # return the result of signed blinded token
     try:
-        blinded_token_hash: str = crypto.hash_blinded_token(blinded_token)
-
-        # check if blinded token hash already in votes_db before insertion
-        if not is_blinded_token_hash_unique(db, blinded_token_hash):    
-            raise RuntimeError("Token already registered")
-        else:
-            processing.insert_blinded_token_hash(db, blinded_token_hash)
-        
-        # sign blinded token
         blinded_signature = crypto.sign_blinded_token(blinded_token)
         return {"blinded_signature": blinded_signature}
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/login")
+def login(payload: VoterCredential):
+    # get token and signature
+    token = payload.token
+    signature = payload.signature
+
+    if not crypto.verify_signature(token, signature):
+        raise HTTPException(401, "Invalid credential")
+
+    return {"status": "authenticated", "redirect": "/cast"}

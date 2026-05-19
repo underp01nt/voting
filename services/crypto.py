@@ -50,22 +50,44 @@ def initialize_keys():
     private_numbers = private_key.private_numbers()
     public_numbers = public_key.public_numbers()
 
-    n = public_numbers.n
-    e = public_numbers.e
-    d = private_numbers.d
+    # public key components
+    n = public_numbers.n    # modulus 
+    e = public_numbers.e    # exponent
+
+    # private key exponent
+    d = private_numbers.d   
 
     return n, e, d
 
 n, e, d = initialize_keys()
 
+""" HELPER METHODS """
+
+def hash_token(token: str): 
+    return hashlib.sha256(token.encode()).digest()
+
+# hashes token, then converts to int 
+def _to_hashed_int(token: str) -> int:
+    h = hash_token(token)
+    return int.from_bytes(h, "big") % n
+
+
+""" SIGNING + VERIFICATION METHODS """
+
+# signs voter's blinded(SHA256(token))
 def sign_blinded_token(blinded_token: str) -> str:
     blinded_int = int(blinded_token)
     blinded_signature = pow(blinded_int, d, n)
 
     return str(blinded_signature)
 
-def hash_blinded_token(blinded_token: str) -> str:
-    return hashlib.sha256(blinded_token.encode()).hexdigest()
+# use public key (e, n) to verify voter's signature 
+def verify_signature(token: str, signature: str):
+    token_int = _to_hashed_int(token)   # voter hashed the token before blinding, so maintain that consistency
+    signature_int = int(signature)
+
+    return pow(signature_int, e, n) == token_int
+
 
 # if __name__ == "__main__":
 #     print(n)

@@ -13,11 +13,11 @@
             <h1>Sign in to Project AIR</h1>
             <p class="subtitle">Enter your access token to continue</p>
             <hr class="gov-divider">
-            <form action="/login" method="post" class="gov-form">
+            <form class="gov-form">
                 <div class="form-group">
                     <label for="token">Access Token</label>
                     <div style="position: relative; display: inline-block; width: 100%;">
-                        <input type="password" id="token" name="token" required class="gov-input" style="padding-right: 2.5em;">
+                        <input type="password" id="credential" name="credential" required class="gov-input" style="padding-right: 2.5em;">
                         <button type="button" id="toggleToken">
                             <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -26,7 +26,7 @@
                         </button>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary btn-wide">Sign In</button>
+                <button type="button" id="submitBtn" class="btn btn-primary btn-wide">Sign In</button>
             </form>
             <div class="auth-footer">
                 <a href="/" class="back-link">← Go back</a>

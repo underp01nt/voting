@@ -17,8 +17,8 @@ toggleBtn.addEventListener('click', () => {
 submitBtn.addEventListener('click', async () => {
     const [token, signature] = credential.value.split(".");
 
-    console.log(token)
-    console.log(signature)
+    // console.log(token)
+    // console.log(signature)
 
     const res = await fetch("/login", {
         method: "POST",
@@ -30,7 +30,7 @@ submitBtn.addEventListener('click', async () => {
     });
 
     const data = await res.json();
-    console.log(data);
+    // console.log(data);
 
     if (res.ok && data.status === "authenticated") {
         window.location.href = data.redirect;  

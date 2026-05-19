@@ -28,15 +28,16 @@ def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
 
     return results
 
-def insert_blinded_token_hash(db, blinded_token_hash: str):
+def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None):
     cursor = db.cursor()
 
     cursor.execute(
         """
-            INSERT INTO ballots (hashed_token)
-            VALUES (%s)
+            INSERT INTO ballots (hashed_signature, encrypted_ballot)
+            VALUES (%s, %s)
+            ON CONFLICT (hashed_signature) DO NOTHING
         """,
-        (blinded_token_hash,)
+        (hashed_signature, encrypted_ballot)
     )
 
     db.commit()

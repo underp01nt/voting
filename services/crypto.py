@@ -63,8 +63,11 @@ n, e, d = initialize_keys()
 
 """ HELPER METHODS """
 
-def hash_token(token: str): 
+def hash_token(token: str):             # hashed in byte form
     return hashlib.sha256(token.encode()).digest()
+
+def hash_token_hex(token: str) -> str:  # hashed in string form
+    return hashlib.sha256(token.encode()).hexdigest()
 
 # hashes token, then converts to int 
 def _to_hashed_int(token: str) -> int:

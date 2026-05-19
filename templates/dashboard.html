@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Dashboard - Project AIR</title>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-topbar">
+            <span class="topbar-brand">Project <span>AIR</span></span>
+            <div class="topbar-right">
+                <a href="/logout" class="back-link">Sign out</a>
+            </div>
+        </div>
+ 
+        <div class="dashboard-body">
+            <h1>Dashboard</h1>
+            <hr class="gov-divider">
+ 
+            <div class="section-header">
+                <h2>Active Elections</h2>
+                <span class="section-count">1</span>
+            </div>
+ 
+            <div class="election-card">
+                <div class="election-info">
+                    <p class="election-title">Election A — Round 1</p>
+                    <p class="election-meta">Opened May 15, 2026 &nbsp;·&nbsp; 8 candidates on ballot</p>
+                    <span class="status-pill active">
+                        <span class="status-dot"></span>
+                        Voting open
+                    </span>
+                </div>
+                <div class="election-timer">
+                    <div class="timer-label">Closes in  ( ** TIMER HERE ** )</div>
+                    <div class="timer-value" id="timer-1"></div>
+                </div>
+                <div class="election-actions">
+                    <a href="/cast" class="btn-cast">Cast Ballot →</a>
+                    <a href="/standings" class="btn-standings">View Current Standings</a>
+                </div>
+            </div>
+ 
+            <div class="section-header">
+                <h2>Closed Elections</h2>
+                <span class="section-count" style="background: #71767a;">1</span>
+            </div>
+ 
+            <div class="election-card closed">
+                <div class="election-info">
+                    <p class="election-title">Expired</p>
+                    <p class="election-meta">Closed May 1, 2026</p>
+                    <span class="status-pill closed">
+                        <span class="status-dot"></span>
+                        Closed
+                    </span>
+                </div>
+                <div class="election-actions">
+                    <span class="btn-cast disabled">Voting closed</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

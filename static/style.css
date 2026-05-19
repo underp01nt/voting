@@ -525,3 +525,257 @@ body {
     height: 20px;
     padding: 0 6px;
 }
+
+.dashboard-container {
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    box-sizing: border-box;
+    font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+}
+
+/* ── Top bar ── */
+.dashboard-topbar {
+    background: white;
+    border-bottom: 1px solid #d6d7d9;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+}
+
+.topbar-brand {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1b1b1b;
+    letter-spacing: 0.02em;
+}
+
+.topbar-brand span {
+    color: #005ea2;
+}
+
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.topbar-user {
+    font-size: 0.875rem;
+    color: #565c65;
+}
+
+/* ── Page body ── */
+.dashboard-body {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+}
+
+.dashboard-body h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1b1b1b;
+    margin: 0 0 4px;
+}
+
+/* ── Section ── */
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 36px 0 16px;
+}
+
+.section-header h2 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #565c65;
+    margin: 0;
+}
+
+.section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #005ea2;
+    color: white;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+}
+
+/* ── Election card ── */
+.election-card {
+    background: white;
+    border-top: 4px solid #005ea2;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    padding: 24px 28px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.election-card.closed {
+    border-top-color: #71767a;
+    opacity: 0.7;
+}
+
+.election-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.election-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1b1b1b;
+    margin: 0 0 4px;
+}
+
+.election-meta {
+    font-size: 0.875rem;
+    color: #565c65;
+    margin: 0 0 12px;
+}
+
+/* ── Status pill ── */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.status-pill.active {
+    background: #e8f5e9;
+    color: #1f7a1f;
+}
+
+.status-pill.closed {
+    background: #f0f0f0;
+    color: #71767a;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.status-pill.active .status-dot {
+    animation: pulse 1.5s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+
+.election-timer {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.timer-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #71767a;
+    margin-bottom: 4px;
+}
+
+.timer-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #1b1b1b;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+}
+
+.timer-value.urgent {
+    color: #b50909;
+}
+
+.election-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    margin-top: 12px;
+}
+
+.btn-cast {
+    background-color: #005ea2;
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 10px 22px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.1s ease;
+    white-space: nowrap;
+}
+
+.btn-cast:hover {
+    background-color: #1a4480;
+}
+
+.btn-cast:disabled, .btn-cast.disabled {
+    background-color: #71767a;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.empty-state {
+    background: white;
+    padding: 40px;
+    text-align: center;
+    color: #71767a;
+    font-size: 0.95rem;
+    border: 1px dashed #d6d7d9;
+}
+
+.topbar-auth {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #1b1b1b;
+    letter-spacing: 0.02em;
+}
+
+.topbar-auth span {
+    color: #005ea2;
+}
+
+.btn-standings {
+    background-color: white;
+    color: #005ea2;
+    border: none;
+    padding: 10px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.1s ease;
+    white-space: nowrap;
+}

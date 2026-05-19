@@ -15,10 +15,13 @@ async def landing(request: Request):
 
 @router.get("/", response_class=HTMLResponse)
 async def auth_page(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="auth.html",
-    )
+    if request.session.get("id", None):
+        return RedirectResponse("/dashboard", status_code=303)
+    else:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth.html",
+        )
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -65,3 +68,20 @@ async def get_token(request: Request):
         request=request, 
         name="token.html",
     )
+
+@router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    if request.session.get("id", None):
+        return templates.TemplateResponse(
+            request=request, 
+            name="dashboard.html",
+        )
+    else:
+        return RedirectResponse("/", status_code=303)
+
+@router.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    if request.session.get("id", None):
+        del request.session["id"]
+
+    return RedirectResponse("/", status_code=303)

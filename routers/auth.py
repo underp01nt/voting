@@ -66,7 +66,7 @@ def blind_sign(payload: BlindSignRequest, db = Depends(get_votes_db)):
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.post("/login")
-def login(payload: VoterCredential, db = Depends(get_votes_db)):
+def login(request: Request, payload: VoterCredential, db = Depends(get_votes_db)):
     # get token and signature
     token = payload.token
     signature = payload.signature
@@ -74,7 +74,11 @@ def login(payload: VoterCredential, db = Depends(get_votes_db)):
     if not crypto.verify_signature(token, signature):
         raise HTTPException(401, "Invalid credential")
     
-    hashed_signature = crypto.hash_token_hex(signature)
-    processing.insert_or_get_ballot(db, hashed_signature)
+    try:
+        hashed_signature = crypto.hash_token_hex(signature)
+        request.session["id"] = hashed_signature
+        processing.insert_or_get_ballot(db, hashed_signature)
 
-    return {"status": "authenticated", "redirect": "/cast"}
+        return {"status": "authenticated", "redirect": "/dashboard"}
+    
+    except Exception as e: print(e)

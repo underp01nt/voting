@@ -6,25 +6,33 @@
 
 ## Quick start
 
-1. ### Create a virtual environment and activate it
+1. ### Clone the repository
 ```bash
-python -m venv env
-
-source env/bin/activate   # linux, macOS 
-env\Scripts\activate      # windows
+git clone https://github.com/underp01nt/voting.git
 ```
 
-2. ### Install dependencies
+2. ### Move into the repository
 ```bash
-pip install -r requirements.txt
+cd voting
 ```
 
-3. ### Start the server locally
+3. ### Copy .env.example to .env
 ```bash
-uvicorn main:app --reload
+cp .env.example .env
 ```
 
-4. ### Access the web interface
+4. ### Build and start the required containers
+```bash
+docker compose up --build
+```
+
+5. ### Access the web server
 ```
 127.0.0.1:8000
+```
+
+### Testing
+- For token generation:
+```
+127.0.0.1:8000/test-token
 ```

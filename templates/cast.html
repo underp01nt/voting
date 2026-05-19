@@ -8,34 +8,66 @@
     <link rel="stylesheet" href="/static/style.css">
     <title>Cast Ballot - Project AIR</title>
 </head>
-<body>    
-    <div class="index" style="height: auto; padding: 40px; align-items: stretch;"> 
-        <h1>Voting Platform</h1>
-        <p class="subtitle">Select candidates to build your list of approvals</p>
-        <hr class="gov-divider">
-
-        <div class="voting-grid">
-            <div class="candidates-column">
-                <h3>Select Candidates</h3>
-                <div class="search-container" style="position: relative; margin-bottom: 20px;">
-                    <input type="text" id="candidate-search" placeholder="Search candidates..." class="gov-input" onkeyup="filterCandidates()" onfocus="showDropdown()" onblur="hideDropdown()">
-                    <div id="search-dropdown" class="gov-dropdown" style="display: none; position: absolute; width: 100%; background: white; border: 1px solid #d6d7d9; z-index: 1000; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+<body>
+    <div class="auth-container">
+        <div class="auth-card ballot-card" style="top: 20000;">
+            <h1>Cast Your Ballot</h1>
+            <p class="subtitle">Select candidates to build your approval list, then submit.</p>
+            <hr class="gov-divider">
+ 
+            <div class="voting-grid">
+ 
+                <!-- Left: candidate search -->
+                <div class="candidates-column">
+                    <p class="column-label">Available Candidates</p>
+                    <div class="search-wrapper">
+                        <input
+                            type="text"
+                            id="candidate-search"
+                            placeholder="Search candidates…"
+                            class="gov-input"
+                            onkeyup="filterCandidates()"
+                            onfocus="showDropdown()"
+                            onblur="hideDropdown()"
+                            autocomplete="off"
+                            style="padding-right: 2.4rem;"
+                        >
+                        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                        <div id="search-dropdown" class="gov-dropdown" style="display: none;"></div>
                     </div>
                 </div>
-
-            </div>
-
-            <div class="cart-column">
-                <h3>Your Approval List (Shopping Cart)</h3>
-                <div id="cart" class="cart-section">
-                    <p id="empty-msg">No candidates selected. Your approval list will appear here.</p>
+ 
+                <!-- Right: approval cart -->
+                <div class="cart-column">
+                    <div class="cart-header">
+                        <p class="column-label" style="margin-bottom: 0;">Your Approval List</p>
+                        <span class="count-badge" id="cart-count">0</span>
+                    </div>
+                    <div id="cart" class="cart-section">
+                        <p id="empty-msg">No candidates selected. Your approvals will appear here.</p>
+                    </div>
                 </div>
-                
-                <div id="action-container" style="display: none; margin-top: 20px;">
-                    <button class="btn btn-primary btn-wide">Submit Approval List</button>
+ 
+            </div>
+ 
+            <div class="auth-footer" style="display: flex; justify-content: space-between; align-items: center;">
+                <a href="/" class="back-link">← Go back</a>
+                <div id="action-container" style="display: none;">
+                    <button class="btn btn-primary" style="border-radius: 999px; padding: 10px 24px; cursor: pointer;">Submit Approval List</button>
                 </div>
             </div>
         </div>
     </div>
+ 
+    <script>
+        const cartDiv = document.getElementById('cart');
+        const badge = document.getElementById('cart-count');
+ 
+        new MutationObserver(() => {
+            badge.textContent = cartDiv.querySelectorAll('.ballot-item').length;
+        }).observe(cartDiv, { childList: true, subtree: true });
+    </script>
 </body>
 </html>

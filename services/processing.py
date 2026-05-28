@@ -41,3 +41,38 @@ def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None):
     )
 
     db.commit()
+
+def create_new_election(db, **kwargs):
+    cursor = db.cursor()
+
+    try:
+        query = """
+            INSERT INTO elections (id, name, target_size, valid, round)
+            VALUES (%s, %s, %s, %s, %s)
+            ON CONFLICT (id, valid)
+            DO UPDATE SET name = EXCLUDED.name
+            RETURNING id
+        """
+        data = (kwargs["id"], kwargs["name"], kwargs["target_size"], kwargs["valid"], kwargs["round"])
+
+        cursor.execute(query, data)
+        result = cursor.fetchone()
+
+        if not result: raise Exception("New election insertion failed") 
+        else: election_id = result[0]
+
+        # register all voters to this election if specified
+        if kwargs.get("apply_to_all"):
+            update_query = """
+                UPDATE ballots
+                SET election_id = %s, round = %s
+            """
+
+            cursor.execute(update_query, (election_id, kwargs["round"]))
+
+        db.commit()
+        return election_id
+
+    except Exception:
+        db.rollback()
+        raise

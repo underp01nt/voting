@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/style.css">
+        <script src="/static/js/tiers.js" defer></script>
+        
+        <title>Tiered Ballot</title>
+    </head>
+
+    <body>
+        <div class="auth-container">
+            <div class="auth-card ballot-card">
+
+                <h1>Create Ranked Tiers</h1>
+                <p class="subtitle">Add candidates to ranked tiers. The tier with the lowest number is higher preference.</p>
+
+                <hr class="gov-divider">
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                    <button class="btn btn-secondary" onclick="addTier()">+ Add a tier</button>
+                    <button class="btn btn-secondary" onclick="clearAllTiers()">Clear all tiers</button>
+                </div>
+
+                <div id="tiers-container"></div>
+
+                <div class="auth-footer" style="display:flex; justify-content:space-between; margin-top:20px;">
+                    <a href="/" class="back-link">← Go back</a>
+
+                    <button class="btn btn-primary"
+                            onclick="submitBallot()"
+                            style="border-radius:999px; padding:10px 24px;">
+                        Submit Ballot
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html>

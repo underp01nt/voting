@@ -1,6 +1,7 @@
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-import hashlib, os
+from services.utils import to_hashed_int
+import os
 
 public_exponent, key_size = 65537, 2048
 private_key = rsa.generate_private_key(public_exponent=public_exponent, key_size=key_size)
@@ -33,13 +34,23 @@ def save_keys():
             )
         )
 
-def load_private_key():
+def load_private_key() -> rsa.RSAPrivateKey:
     with open("sample_keys/private.pem", "rb") as f:
-        return serialization.load_pem_private_key(f.read(), password=None)
+        private_key = serialization.load_pem_private_key(f.read(), password=None)
 
-def load_public_key():
+        if not isinstance(private_key, rsa.RSAPrivateKey):
+            raise TypeError("RSA private key expected")
+        
+        return private_key
+
+def load_public_key() -> rsa.RSAPublicKey:
     with open("sample_keys/public.pem", "rb") as f:
-        return serialization.load_pem_public_key(f.read())
+        public_key = serialization.load_pem_public_key(f.read())
+
+        if not isinstance(public_key, rsa.RSAPublicKey):
+            raise TypeError("RSA public key expected")
+        
+        return public_key
     
 ##############################################################################################
 
@@ -61,38 +72,18 @@ def initialize_keys():
 
 n, e, d = initialize_keys()
 
-""" HELPER METHODS """
-
-def hash_token(token: str):             # hashed in byte form
-    return hashlib.sha256(token.encode()).digest()
-
-def hash_token_hex(token: str) -> str:  # hashed in string form
-    return hashlib.sha256(token.encode()).hexdigest()
-
-# hashes token, then converts to int 
-def _to_hashed_int(token: str) -> int:
-    h = hash_token(token)
-    return int.from_bytes(h, "big") % n
-
-
 """ SIGNING + VERIFICATION METHODS """
 
 # signs voter's blinded(SHA256(token))
 def sign_blinded_token(blinded_token: str) -> str:
     blinded_int = int(blinded_token)
-    blinded_signature = pow(blinded_int, d, n)
+    blinded_signature = pow(blinded_int, d, n)   
 
-    return str(blinded_signature)
+    return str(blinded_signature)   # blinded signature: (M')^d (mod n)
 
 # use public key (e, n) to verify voter's signature 
 def verify_signature(token: str, signature: str):
-    token_int = _to_hashed_int(token)   # voter hashed the token before blinding, so maintain that consistency
+    token_int = to_hashed_int(token)   # voter hashed the token before blinding, so maintain that consistency
     signature_int = int(signature)
 
-    return pow(signature_int, e, n) == token_int
-
-
-# if __name__ == "__main__":
-#     print(n)
-#     print(e)
-#     print(d)
+    return pow(signature_int, e, n) == token_int % n   # verification: s^e (mod n) ≡ h (mod n) 

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Form, Depends, Request, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from db.factory import get_election_authority_db, get_votes_db
-from services.authentication import verify_voter, is_blinded_token_hash_unique
+from services.authentication import verify_voter # , is_blinded_token_hash_unique
 from pydantic import BaseModel
-from services import crypto, processing
+from services import crypto, processing, utils
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -75,7 +75,7 @@ def login(request: Request, payload: VoterCredential, db = Depends(get_votes_db)
         raise HTTPException(401, "Invalid credential")
     
     try:
-        hashed_signature = crypto.hash_token_hex(signature)
+        hashed_signature = utils.hash_hex(signature)
         request.session["id"] = hashed_signature
         processing.insert_or_get_ballot(db, hashed_signature)
 

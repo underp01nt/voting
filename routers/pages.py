@@ -85,3 +85,10 @@ async def logout(request: Request):
         del request.session["id"]
 
     return RedirectResponse("/", status_code=303)
+
+@router.get("/tiers", response_class=HTMLResponse)
+async def tiers(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="tiers.html"
+    )

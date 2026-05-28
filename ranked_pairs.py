@@ -1,17 +1,20 @@
 import numpy as np
 import pandas as pd
-from rankings import generate_random_votes
+from votingutils import pairwise_comparison, matrix_of_majorities
 
 # Basically a topological sort of the DAG, except it might not be
 # connected and what even are vertices?
 def topological_sort(vertices:list, edges:list):
+    if not vertices:
+        return vertices, edges
+    
     indegrees = {v: 0 for v in vertices}
     for edge in edges:
         indegrees[edge[1]] += 1
     
     start = [v for v in vertices if indegrees[v] == 0]
     if not start:
-        raise Exception("Full Cycle")
+        raise Warning("Full Cycle")
     
     final = []
     remaining_edges = edges.copy()
@@ -27,7 +30,7 @@ def topological_sort(vertices:list, edges:list):
         # print(indegrees)
     
     if len(final) < len(vertices):
-        raise Exception("Embedded Cycle")
+        raise Warning("Embedded Cycle")
                 
     return final, edges
 
@@ -41,7 +44,7 @@ def ranked_pairs(candidates:list, votes:list):
             for j in range(i+1, len(vote)):
                 pairs[(vote[i], vote[j])] += 1
     
-    sorted_pairs = sorted(pairs.items(), key=lambda x: x[1], reverse=True)
+    sorted_pairs = sorted(pairs.items(), key=lambda x: (x[1], np.random.rand()), reverse=True)
     sorted_wins = sorted_pairs[:len(sorted_pairs)//2]
     
     vertices = []
@@ -53,7 +56,7 @@ def ranked_pairs(candidates:list, votes:list):
                 vertices + [v for v in sorted_wins[i][0] if v not in vertices],
                 edges + [sorted_wins[i][0]]
             )
-        except Exception as e:
+        except Warning as e:
             print(e)
             pass
         finally:
@@ -81,3 +84,8 @@ if __name__ == "__main__":
     ranking = ranked_pairs(candidates, rankings)
     
     print(ranking)
+
+
+def ranked_pairs_numerical(candidates:list, votes:list):
+    matrix, _ = matrix_of_majorities(candidates, votes)
+    pass

@@ -2,6 +2,7 @@
 import numpy as np
 import networkx as nx
 import matplotlib.pyplot as plt
+from Drawing import beat_graph
 
 def pairwise_comparison(candidates:list, votes:list):
     pairs = {
@@ -16,13 +17,6 @@ def pairwise_comparison(candidates:list, votes:list):
     # return {p : pairs[p] for p in pairs if pairs[p] >= (len(votes) + 1) // 2}
     return pairs
 
-# Returns a NetworkX graph of pairwise comparisons with edges labeled by win strength
-def beat_graph(candidates:list, votes:list):
-    pairs = pairwise_comparison(candidates, votes)
-    pairs = {p : pairs[p] for p in pairs if pairs[p] >= (len(votes) + 1) // 2}
-    graph = nx.DiGraph()
-    graph.add_weighted_edges_from([(a,b,pairs[(a,b)]) for (a,b) in pairs])
-    return graph
     
 if __name__ == "__main__":
     candidates = ['A', 'B', 'C']

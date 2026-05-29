@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Form, Depends, Request, HTTPException
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
 from db.factory import get_election_authority_db, get_votes_db
 from services.authentication import verify_voter # , is_blinded_token_hash_unique
@@ -76,9 +76,16 @@ def login(request: Request, payload: VoterCredential, db = Depends(get_votes_db)
     
     try:
         hashed_signature = utils.hash_hex(signature)
-        request.session["id"] = hashed_signature
+        request.session["hashed_signature"] = hashed_signature
         processing.insert_or_get_voter(db, hashed_signature)
 
         return {"status": "authenticated", "redirect": "/dashboard"}
     
     except Exception as e: print(e)
+
+@router.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    if request.session.get("hashed_signature", None):
+        del request.session["hashed_signature"]
+
+    return RedirectResponse("/", status_code=303)

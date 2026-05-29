@@ -15,7 +15,7 @@ async def landing(request: Request):
 
 @router.get("/", response_class=HTMLResponse)
 async def auth_page(request: Request):
-    if request.session.get("id", None):
+    if request.session.get("hashed_signature", None):
         return RedirectResponse("/dashboard", status_code=303)
     else:
         return templates.TemplateResponse(
@@ -71,20 +71,13 @@ async def get_token(request: Request):
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
-    if request.session.get("id", None):
+    if request.session.get("hashed_signature", None):
         return templates.TemplateResponse(
             request=request, 
             name="dashboard.html",
         )
     else:
         return RedirectResponse("/", status_code=303)
-
-@router.get("/logout", response_class=HTMLResponse)
-async def logout(request: Request):
-    if request.session.get("id", None):
-        del request.session["id"]
-
-    return RedirectResponse("/", status_code=303)
 
 @router.get("/tiers", response_class=HTMLResponse)
 async def tiers(request: Request):

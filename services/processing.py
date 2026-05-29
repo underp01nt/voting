@@ -1,5 +1,6 @@
 from ranked_pairs import ranked_pairs
 from services.viz import build_rank_table, build_heat_map
+from services.utils import generate_id
 from io import StringIO
 import time,csv
 
@@ -49,11 +50,11 @@ def create_new_election(db, **kwargs):
         query = """
             INSERT INTO elections (id, name, target_size, valid, round)
             VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (id, valid)
-            DO UPDATE SET name = EXCLUDED.name
             RETURNING id
         """
-        data = (kwargs["id"], kwargs["name"], kwargs["target_size"], kwargs["valid"], kwargs["round"])
+
+        valid=True; id=generate_id(16); round=1
+        data = (id, kwargs["name"], kwargs["target_size"], valid, round)
 
         cursor.execute(query, data)
         result = cursor.fetchone()
@@ -68,7 +69,7 @@ def create_new_election(db, **kwargs):
                 SET election_id = %s, round = %s
             """
 
-            cursor.execute(update_query, (election_id, kwargs["round"]))
+            cursor.execute(update_query, (election_id, round))
 
         db.commit()
         return election_id

@@ -1,3 +1,8 @@
+CREATE TABLE voters (
+    hashed_signature TEXT PRIMARY KEY,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE ballots (
     id BIGSERIAL PRIMARY KEY,
 
@@ -7,7 +12,7 @@ CREATE TABLE ballots (
     election_id TEXT,
     round INTEGER,
 
-    UNIQUE(hashed_signature, election_id, round)
+    UNIQUE(hashed_signature, election_id)
 );
 
 CREATE TABLE elections (

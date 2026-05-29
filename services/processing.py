@@ -30,16 +30,30 @@ def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
 
     return results
 
-def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None):
+def insert_or_get_voter(db, hashed_signature: str):
     cursor = db.cursor()
 
     cursor.execute(
         """
-            INSERT INTO ballots (hashed_signature, encrypted_ballot)
-            VALUES (%s, %s)
-            ON CONFLICT (hashed_signature) DO NOTHING
+        INSERT INTO voters (hashed_signature)
+        VALUES (%s)
+        ON CONFLICT (hashed_signature) DO NOTHING
         """,
-        (hashed_signature, encrypted_ballot)
+        (hashed_signature,)
+    )
+
+    db.commit()
+
+def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None, election_id=None):
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+            INSERT INTO ballots (hashed_signature, encrypted_ballot, election_id)
+            VALUES (%s, %s, %s)
+            ON CONFLICT (hashed_signature, election_id) DO NOTHING
+        """,
+        (hashed_signature, encrypted_ballot, election_id)
     )
 
     db.commit()

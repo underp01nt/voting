@@ -12,8 +12,8 @@ CREATE TABLE ballots (
 
 CREATE TABLE elections (
     id VARCHAR(32) PRIMARY KEY NOT NULL UNIQUE,
-    name VARCHAR(32),
-    target_size INTEGER,
+    name VARCHAR(32) NOT NULL UNIQUE,
+    target_size INTEGER NOT NULL,
     valid BOOLEAN NOT NULL,
     round INTEGER,
 
@@ -22,9 +22,9 @@ CREATE TABLE elections (
 
 CREATE TABLE candidates (
     id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE,
-    full_name VARCHAR(40) NOT NULL UNIQUE, 
-    election_id VARCHAR(32) NOT NULL, 
+    name VARCHAR(40) NOT NULL UNIQUE, 
+    election_id VARCHAR(32), 
     round_eliminated INTEGER,
 
-    UNIQUE(id, full_name)
+    UNIQUE(id, name)
 );

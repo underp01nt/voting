@@ -2,6 +2,7 @@ from ranked_pairs import ranked_pairs
 from services.viz import build_rank_table, build_heat_map
 from services.utils import generate_id
 from io import StringIO
+from typing import Optional
 import time,csv
 
 # convert data to text, then make text reader iterable per row
@@ -43,7 +44,8 @@ def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None):
 
     db.commit()
 
-def create_new_election(db, **kwargs):
+# returns election ID if election is successfully created
+def create_new_election(db, name: str, target_size: int, apply_to_all: bool) -> str:
     cursor = db.cursor()
 
     try:
@@ -53,8 +55,8 @@ def create_new_election(db, **kwargs):
             RETURNING id
         """
 
-        valid=True; id=generate_id(16); round=1
-        data = (id, kwargs["name"], kwargs["target_size"], valid, round)
+        valid=True; id=generate_id(16); round_number=1
+        data = (id, name, target_size, valid, round_number)
 
         cursor.execute(query, data)
         result = cursor.fetchone()
@@ -63,16 +65,47 @@ def create_new_election(db, **kwargs):
         else: election_id = result[0]
 
         # register all voters to this election if specified
-        if kwargs.get("apply_to_all"):
+        if apply_to_all:
             update_query = """
                 UPDATE ballots
                 SET election_id = %s, round = %s
             """
 
-            cursor.execute(update_query, (election_id, round))
+            cursor.execute(update_query, (election_id, round_number))
 
         db.commit()
         return election_id
+
+    except Exception:
+        db.rollback()
+        raise
+
+# returns candidate ID if candidate is successfully created
+def add_new_candidate(name: str, election_name: Optional[str], election_id: Optional[str], db) -> str: 
+    cursor = db.cursor()
+
+    try:
+        if not election_id and election_name:  # make query to elections table to find the election
+            cursor.execute("SELECT id FROM elections WHERE name = %s", (election_name,))
+            result = cursor.fetchone()
+
+            if not result: 
+                raise ValueError(f"Could not find election with name {election_name}")
+            
+            election_id = result[0]
+
+        query = """
+            INSERT INTO candidates (id, name, election_id)
+            VALUES (%s, %s, %s)
+            RETURNING id
+        """
+        candidate_id = generate_id(8)
+        data = (candidate_id, name, election_id)
+        
+        cursor.execute(query, data)
+        db.commit()
+
+        return candidate_id
 
     except Exception:
         db.rollback()

@@ -8,13 +8,6 @@ from typing import Optional
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-@router.get("/test", response_class=HTMLResponse)
-async def landing(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="index.html",
-    )
-
 @router.get("/", response_class=HTMLResponse)
 async def auth_page(request: Request):
     if request.session.get("hashed_signature", None):
@@ -30,13 +23,6 @@ async def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
-    )
-
-@router.get("/cast", response_class=HTMLResponse)
-async def cast(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="cast.html",
     )
 
 @router.get("/request", response_class=HTMLResponse)
@@ -64,13 +50,6 @@ async def token(request: Request):
     
     return RedirectResponse("/", status_code=303)
 
-@router.get("/test-token", response_class=HTMLResponse)
-async def get_token(request: Request):
-    return templates.TemplateResponse(
-        request=request, 
-        name="token.html",
-    )
-
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
@@ -84,8 +63,22 @@ async def dashboard(request: Request, db=Depends(get_votes_db)):
         )
     else: return RedirectResponse("/", status_code=303)
 
-@router.get("/tiers", response_class=HTMLResponse)
-async def tiers(request: Request):
+@router.get("/test-cast", response_class=HTMLResponse)
+async def test_cast(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="cast.html",
+    )
+
+@router.get("/test-token", response_class=HTMLResponse)
+async def get_token(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="token.html",
+    )
+
+@router.get("/test-tiers", response_class=HTMLResponse)
+async def test_tiers(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="tiers.html"

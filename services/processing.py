@@ -180,3 +180,16 @@ def nominate_candidate(db, candidate_id: str, election_id: str):
     except Exception:
         db.rollback()
         raise
+
+def check_voter_in_election(hashed_signature: str, election_id: str, db) -> tuple:
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT 1
+        FROM ballots
+        WHERE hashed_signature = %s
+        AND election_id = %s
+        """,
+        (hashed_signature, election_id)
+    )
+    return cursor.fetchone()

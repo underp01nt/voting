@@ -1,15 +1,16 @@
 from db.factory import get_votes_db
 from fastapi import APIRouter, Request, Depends
+from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from services.processing import get_elections
+from services.processing import get_elections, check_voter_in_election
 from typing import Optional
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
-async def auth_page(request: Request):
+def auth_page(request: Request):
     if request.session.get("hashed_signature", None):
         return RedirectResponse("/dashboard", status_code=303)
     else:
@@ -19,14 +20,14 @@ async def auth_page(request: Request):
         )
 
 @router.get("/login", response_class=HTMLResponse)
-async def login_page(request: Request):
+def login_page(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="login.html",
     )
 
 @router.get("/request", response_class=HTMLResponse)
-async def request_token(request: Request, verification_type: Optional[str] = None):
+def request_token(request: Request, verification_type: Optional[str] = None):
     match verification_type:
         case "manual": template_name = "verify-form.html"
         case "government_id": template_name = "verify-photo.html"
@@ -41,7 +42,7 @@ async def request_token(request: Request, verification_type: Optional[str] = Non
     )
 
 @router.get("/token", response_class=HTMLResponse)
-async def token(request: Request):
+def token(request: Request):
     if request.session.pop("allowed_token", None):
         return templates.TemplateResponse(
             request=request,
@@ -51,7 +52,7 @@ async def token(request: Request):
     return RedirectResponse("/", status_code=303)
 
 @router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request, db=Depends(get_votes_db)):
+def dashboard(request: Request, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
     if hashed_signature:
         active_elections: list[dict] = get_elections(hashed_signature, db)
@@ -63,22 +64,38 @@ async def dashboard(request: Request, db=Depends(get_votes_db)):
         )
     else: return RedirectResponse("/", status_code=303)
 
+@router.get("/cast")
+def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
+    hashed_signature = request.session.get("hashed_signature")
+
+    if not hashed_signature: raise HTTPException(401, "Not authenticated")
+    elif not check_voter_in_election(hashed_signature, id, db):
+        raise HTTPException(403, "Not registered for this election")
+
+    return templates.TemplateResponse(
+            request=request, 
+            name="cast.html",
+            context={}
+        )
+
+####################  TEST ROUTES  #######################
+
 @router.get("/test-cast", response_class=HTMLResponse)
-async def test_cast(request: Request):
+def test_cast(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="cast.html",
     )
 
 @router.get("/test-token", response_class=HTMLResponse)
-async def get_token(request: Request):
+def get_token(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="token.html",
     )
 
 @router.get("/test-tiers", response_class=HTMLResponse)
-async def test_tiers(request: Request):
+def test_tiers(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="tiers.html"

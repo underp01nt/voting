@@ -1,6 +1,7 @@
 
 let RSA_N;
 const RSA_E = 65537n;
+const TOKEN_SIZE = 16;
 
 async function loadPublicKey() {
     const res = await fetch("/public-key");
@@ -134,6 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const generateBtn = document.getElementById("generateTokenBtn");
     const generationView = document.getElementById("generationView");
     const generatedToken = document.getElementById("generatedToken");
+    const downloadQrBtn = document.getElementById("downloadQrBtn");
 
     const copyBtn = document.getElementById("copyTokenBtn");
     const copyStatus = document.getElementById("copyStatus");
@@ -142,7 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
         generateBtn.disabled = true;
         generateBtn.innerText = "Generating...";
 
-        const randomBytes = new Uint8Array(32);  // define 32 bit size
+        const randomBytes = new Uint8Array(TOKEN_SIZE);  // define 32 bit size
 
         crypto.getRandomValues(randomBytes);
 
@@ -169,6 +171,23 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 500);
 
         // console.log("Generated token:", token);
+    });
+    
+    downloadQrBtn.addEventListener("click", async () => {
+        const dataUrl = await QRCode.toDataURL(fullCredential, {
+            width: 500,
+            margin: 2,
+            errorCorrectionLevel: "M"
+        });
+
+        const link = document.createElement("a");
+
+        link.href = dataUrl;
+        link.download = "anonymous-voting-token.png";
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 
     copyBtn.addEventListener("click", async () => {

@@ -6,33 +6,33 @@ CREATE TABLE voters (
 CREATE TABLE ballots (
     id BIGSERIAL PRIMARY KEY NOT NULL UNIQUE,
 
-    hashed_signature TEXT NOT NULL UNIQUE,
+    hashed_signature TEXT NOT NULL,
     encrypted_ballot TEXT,   /* nullable until voter makes a submission */
-
-    /*  add last modified field?  */
-
-    election_id TEXT,
+    last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    election_id TEXT REFERENCES elections(id),
     round INTEGER,
 
     UNIQUE(hashed_signature, election_id)
 );
 
 CREATE TABLE elections (
-    id VARCHAR(32) PRIMARY KEY NOT NULL UNIQUE,
+    id VARCHAR(32) PRIMARY KEY NOT NULL,
     name VARCHAR(32) NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     target_size INTEGER NOT NULL,
     valid BOOLEAN NOT NULL,
     round INTEGER,
-
-    UNIQUE(id, valid)
 );
 
 CREATE TABLE candidates (
-    id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE,
-    name VARCHAR(40) NOT NULL UNIQUE, 
-    election_id VARCHAR(32), 
+    id VARCHAR(18) PRIMARY KEY NOT NULL,
+    name VARCHAR(40) NOT NULL UNIQUE
+);
+
+CREATE TABLE election_candidates (
+    election_id VARCHAR(32) NOT NULL REFERENCES elections(id),
+    candidate_id VARCHAR(18) NOT NULL REFERENCES candidates(id),
     round_eliminated INTEGER,
 
-    UNIQUE(id, election_id)
-);
+    PRIMARY KEY (election_id, candidate_id)
+)

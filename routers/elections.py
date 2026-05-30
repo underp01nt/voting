@@ -14,7 +14,6 @@ class Election(BaseModel):
 
 class Candidate(BaseModel):
     name: str
-    election_id: Optional[str]
 
 class Voter(BaseModel):
     hashed_signature: str
@@ -32,25 +31,16 @@ def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
         return {"id": election_id, "message": "Election was created successfully!"}
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @router.post("/add-candidate")
 def add_new_candidate_route(payload: Candidate, db=Depends(get_votes_db)):
     try:
-        candidate_id = add_new_candidate(
-            name=payload.name, 
-            election_id=payload.election_id,
-            db=db
-        )
-
-        return {
-            "id": candidate_id, 
-            "message": f"Candidate was successfully added in DB for election {payload.election_id}" \
-            if payload.election_id else "Candidate was successfully registered in DB"
-        }
+        candidate_id = add_new_candidate(name=payload.name, db=db)
+        return {"id": candidate_id, "message": f"Candidate was successfully recorded in DB"}
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
     
 @router.post("/register-voter")
 def register_voter_route(payload: Voter, db=Depends(get_votes_db)):
@@ -63,4 +53,4 @@ def register_voter_route(payload: Voter, db=Depends(get_votes_db)):
         return {"ballot_id": ballot_id}
     
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e

@@ -85,19 +85,17 @@ def create_new_election(db, name: str, target_size: int) -> str:
         raise
 
 # returns candidate ID if candidate is successfully created
-def add_new_candidate(name: str, election_id: Optional[str], db) -> str: 
+def add_new_candidate(name: str, db) -> str: 
     cursor = db.cursor()
 
     try:
-        # TODO: check if election_id exists before insertion
-
         add_new_candidate_query = """
-            INSERT INTO candidates (id, name, election_id)
-            VALUES (%s, %s, %s)
+            INSERT INTO candidates (id, name)
+            VALUES (%s, %s)
             RETURNING id
         """
         candidate_id = generate_id(8)
-        data = (candidate_id, name, election_id)
+        data = (candidate_id, name)
         cursor.execute(add_new_candidate_query, data)
 
         result = cursor.fetchone()

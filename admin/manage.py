@@ -17,11 +17,10 @@ def create_election(identity: str, target_size: int):
     except requests.RequestException as e:
         print(e)
 
-# TODO: decouple election_id from candidate addition
 # -candidate  |  identity = name
-def add_new_candidate(identity: str, election_id: str): 
+def add_new_candidate(identity: str): 
     try:
-        payload = {"name": identity, "election_id": election_id}
+        payload = {"name": identity}
         response = requests.post(f"{ELECTIONS_MGMT_URL}/add-candidate", json=payload)
         response.raise_for_status()
 
@@ -65,5 +64,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.make: create_election(args.identity, args.target_size)
-    elif args.candidate: add_new_candidate(args.identity, args.election_id)
+    elif args.candidate: add_new_candidate(args.identity)
     elif args.register: register_voter(args.identity, args.election, args.election_id)

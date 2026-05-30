@@ -3,6 +3,15 @@ CREATE TABLE voters (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE elections (
+    id VARCHAR(32) PRIMARY KEY NOT NULL,
+    name VARCHAR(32) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    target_size INTEGER NOT NULL,
+    valid BOOLEAN NOT NULL,
+    round INTEGER
+);
+
 CREATE TABLE ballots (
     id BIGSERIAL PRIMARY KEY NOT NULL UNIQUE,
 
@@ -13,15 +22,6 @@ CREATE TABLE ballots (
     round INTEGER,
 
     UNIQUE(hashed_signature, election_id)
-);
-
-CREATE TABLE elections (
-    id VARCHAR(32) PRIMARY KEY NOT NULL,
-    name VARCHAR(32) NOT NULL UNIQUE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    target_size INTEGER NOT NULL,
-    valid BOOLEAN NOT NULL,
-    round INTEGER,
 );
 
 CREATE TABLE candidates (
@@ -35,4 +35,4 @@ CREATE TABLE election_candidates (
     round_eliminated INTEGER,
 
     PRIMARY KEY (election_id, candidate_id)
-)
+);

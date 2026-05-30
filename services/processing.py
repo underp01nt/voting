@@ -154,3 +154,19 @@ def register_voter_to_election(hashed_signature, election_id, db) -> str:
     except Exception:
         db.rollback()
         raise
+
+# nominates a candidate for a specific election
+def nominate_candidate(db, candidate_id: str, election_id: str):
+    try:
+        cursor = db.cursor()
+        nominate_query = \
+            """
+                INSERT INTO election_candidates (election_id, candidate_id)
+                VALUES (%s, %s)
+            """
+        cursor.execute(nominate_query, (election_id, candidate_id))
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        raise

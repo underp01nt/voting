@@ -40,10 +40,21 @@ def register_voter(identity: str, election_name: str, election_id: str):
 
         data = response.json()
         print(f"Successfully registered voter with ballot ID: {data["ballot_id"]}")
-        print(data["message"])
         
     except requests.RequestException as e:
         print(e)
+
+# -nominate  |  identity = candidate_id
+def nominate_candidate(identity: str, election_id: str):
+    try:
+        payload = {"candidate_id": identity, "election_id": election_id}
+        response = requests.post(f"{ELECTIONS_MGMT_URL}/nominate", json=payload)
+        response.raise_for_status()
+
+        data = response.json()
+        print(data["message"])
+
+    except requests.RequestException as e: print(e)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -55,14 +66,18 @@ if __name__ == "__main__":
     parser.add_argument("-candidate", action="store_true")
     # register a voter for a specific election
     parser.add_argument("-register", action="store_true")
+    # nominate a candidate/representative for a specific election
+    parser.add_argument("-nominate", action="store_true")
 
     # params
     parser.add_argument("--target-size", type=int)
     parser.add_argument("--election", type=str)
     parser.add_argument("--election-id", type=str)
+    parser.add_argument("--candidate-id", type=str)
 
     args = parser.parse_args()
 
     if args.make: create_election(args.identity, args.target_size)
     elif args.candidate: add_new_candidate(args.identity)
     elif args.register: register_voter(args.identity, args.election, args.election_id)
+    elif args.nominate: nominate_candidate(args.identity, args.election_id)

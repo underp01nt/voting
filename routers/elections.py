@@ -2,12 +2,18 @@ from db.factory import get_votes_db
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from services.processing import create_new_election, add_new_candidate, register_voter_to_election
+from services.processing import (
+    create_new_election, 
+    add_new_candidate, 
+    register_voter_to_election,
+    nominate_candidate
+)
 from typing import Optional
 
 router = APIRouter(prefix="/elections")
 templates = Jinja2Templates(directory="templates")
 
+""" RELEVANT REQUEST SCHEMAS """
 class Election(BaseModel):
     name: str
     target_size: int
@@ -18,6 +24,10 @@ class Candidate(BaseModel):
 class Voter(BaseModel):
     hashed_signature: str
     election_id: Optional[str]
+
+class Nominee(BaseModel):
+    candidate_id: str
+    election_id : str
     
 @router.post("/new")
 def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
@@ -52,5 +62,13 @@ def register_voter_route(payload: Voter, db=Depends(get_votes_db)):
         )
         return {"ballot_id": ballot_id}
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+    
+@router.post("/nominate")
+def nominate_candidate_route(payload: Nominee, db=Depends(get_votes_db)):
+    try: 
+        nominate_candidate(db, candidate_id=payload.candidate_id, election_id=payload.election_id)
+        return {"message": f"Nominated candidate {payload.candidate_id} for election {payload.election_id}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

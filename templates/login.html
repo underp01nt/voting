@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <script src="/static/js/login.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js" defer></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -27,6 +28,20 @@
                     </div>
                 </div>
                 <button type="button" id="submitBtn" class="btn btn-primary btn-wide">Sign In</button>
+                
+                <div class="qr-actions">
+                    <button type="button" id="uploadQrBtn" class="btn btn-secondary qr-btn" style="flex: 1;">
+                        Upload QR Code
+                    </button>
+
+                    <button type="button" id="scanQrBtn" class="btn btn-secondary qr-btn">
+                        Scan QR Code
+                    </button>
+                </div>
+
+                <input type="file" id="qrFileInput" accept="image/*" style="display:none;">                
+
+                <br>
             </form>
             <div class="auth-footer">
                 <a href="/" class="back-link">← Go back</a>

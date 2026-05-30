@@ -792,3 +792,19 @@ body {
     background: white;
     border-radius: 8px;
 }
+
+.qr-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 1rem;
+}
+
+.qr-btn {
+    flex: 1;
+}
+
+.btn-primary:disabled {
+    background-color: #71767a;
+    color: white;
+    cursor: not-allowed;
+}

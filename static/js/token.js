@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
             .replace(/=+$/, "");   // replace trailing ='s at end
 
         // send blinded token, unblind sent signature to get a valid signature --> combine raw token + signature for credential
-        const credential = await sendBlindedCredential(token); console.log("credential is %s", credential);
+        const credential = await sendBlindedCredential(token); console.log("My credential is %s", credential);
 
         /* Animation phase */
         generationView.classList.add("slide-up");
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const link = document.createElement("a");
 
         link.href = dataUrl;
-        link.download = "anonymous-voting-token.png";
+        link.download = "my-voting-token.png";
 
         document.body.appendChild(link);
         link.click();

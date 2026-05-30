@@ -8,7 +8,9 @@ CREATE TABLE ballots (
 
     hashed_signature TEXT NOT NULL UNIQUE,
     encrypted_ballot TEXT,   /* nullable until voter makes a submission */
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    /*  add last modified field?  */
+    
     election_id TEXT,
     round INTEGER,
 
@@ -18,6 +20,7 @@ CREATE TABLE ballots (
 CREATE TABLE elections (
     id VARCHAR(32) PRIMARY KEY NOT NULL UNIQUE,
     name VARCHAR(32) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     target_size INTEGER NOT NULL,
     valid BOOLEAN NOT NULL,
     round INTEGER,

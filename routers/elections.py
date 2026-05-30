@@ -11,7 +11,6 @@ templates = Jinja2Templates(directory="templates")
 class Election(BaseModel):
     name: str
     target_size: int
-    apply_to_all: bool
 
 class Candidate(BaseModel):
     name: str
@@ -25,7 +24,6 @@ def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
             db, 
             name=payload.name, 
             target_size=payload.target_size, 
-            apply_to_all=payload.apply_to_all,
         )
 
         return {"id": election_id, "message": "Election was created successfully!"}

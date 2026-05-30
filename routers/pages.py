@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Request 
+from db.factory import get_votes_db
+from fastapi import APIRouter, Request, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from services.processing import get_current_elections
 from typing import Optional
 
 router = APIRouter()
@@ -70,14 +72,17 @@ async def get_token(request: Request):
     )
 
 @router.get("/dashboard", response_class=HTMLResponse)
-async def dashboard(request: Request):
-    if request.session.get("hashed_signature", None):
+async def dashboard(request: Request, db=Depends(get_votes_db)):
+    hashed_signature = request.session.get("hashed_signature", None)
+    if hashed_signature:
+        current_elections = get_current_elections(hashed_signature, db)
+        print(current_elections)
         return templates.TemplateResponse(
             request=request, 
             name="dashboard.html",
+            # context = {"current_elections": current_elections}
         )
-    else:
-        return RedirectResponse("/", status_code=303)
+    else: return RedirectResponse("/", status_code=303)
 
 @router.get("/tiers", response_class=HTMLResponse)
 async def tiers(request: Request):

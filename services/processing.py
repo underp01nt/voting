@@ -59,7 +59,7 @@ def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None, elect
     db.commit()
 
 # returns election ID if election is successfully created
-def create_new_election(db, name: str, target_size: int, apply_to_all: bool) -> str:
+def create_new_election(db, name: str, target_size: int) -> str:
     cursor = db.cursor()
 
     try:
@@ -69,7 +69,7 @@ def create_new_election(db, name: str, target_size: int, apply_to_all: bool) -> 
             RETURNING id
         """
 
-        valid=True; id=generate_id(16); round_number=1
+        valid=True; id=generate_id(5); round_number=1
         data = (id, name, target_size, valid, round_number)
 
         cursor.execute(query, data)
@@ -77,15 +77,6 @@ def create_new_election(db, name: str, target_size: int, apply_to_all: bool) -> 
 
         if not result: raise Exception("New election insertion failed") 
         else: election_id = result[0]
-
-        # register all voters to this election if specified
-        if apply_to_all:
-            update_query = """
-                UPDATE ballots
-                SET election_id = %s, round = %s
-            """
-
-            cursor.execute(update_query, (election_id, round_number))
 
         db.commit()
         return election_id
@@ -123,4 +114,24 @@ def add_new_candidate(name: str, election_name: Optional[str], election_id: Opti
 
     except Exception:
         db.rollback()
+        raise
+
+def get_current_elections(hashed_signature: str, db) -> list: 
+    cursor = db.cursor()
+
+    try:
+        active_elections_query = \
+            """
+            SELECT e.id, e.name, e.round, e.created_at
+            FROM ballots b
+            JOIN elections e ON b.election_id = e.id
+            WHERE hashed_signature = %s AND e.valid = TRUE
+            ORDER BY e.created_at DESC
+            """
+        data = (hashed_signature,) 
+        cursor.execute(active_elections_query, data)
+
+        return cursor.fetchall()
+
+    except Exception:
         raise

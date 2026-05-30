@@ -108,14 +108,18 @@ def add_new_candidate(name: str, db) -> str:
         db.rollback()
         raise
 
-# returns list of elections the voter is registered to vote for
-def get_current_elections(hashed_signature: str, db) -> list: 
+# returns list of a voter's elections (+ metadata) 
+def get_elections(hashed_signature: str, db) -> list[dict]: 
     cursor = db.cursor()
 
     try:
         active_elections_query = \
             """
-                SELECT e.id, e.name, e.round, e.created_at
+                SELECT e.id, e.name, e.round, e.created_at, (
+                    SELECT COUNT(*)
+                    FROM election_candidates ec
+                    WHERE ec.election_id = e.id
+                )
                 FROM ballots b
                 JOIN elections e ON b.election_id = e.id
                 WHERE hashed_signature = %s AND e.valid = TRUE
@@ -124,7 +128,13 @@ def get_current_elections(hashed_signature: str, db) -> list:
         data = (hashed_signature,) 
         cursor.execute(active_elections_query, data)
 
-        return cursor.fetchall()
+        return [{
+            "id": row[0], 
+            "name": row[1], 
+            "round": row[2],
+            "created_at": row[3],
+            "count": row[4],
+        } for row in cursor.fetchall()]
 
     except Exception:
         raise

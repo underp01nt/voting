@@ -24,25 +24,25 @@
                 <span class="section-count">1</span>
             </div>
  
+            {% for election in active_elections %}
             <div class="election-card">
                 <div class="election-info">
-                    <p class="election-title">Election A — Round 1</p>
-                    <p class="election-meta">Opened May 15, 2026 &nbsp;·&nbsp; 8 candidates on ballot</p>
+                    <p class="election-title">{{ election.name }} — Round {{ election.round }}</p>
+                    <p class="election-meta">Opened {{ election.created_at }} &nbsp;·&nbsp; {{ election.count }} candidates on ballot</p>
                     <span class="status-pill active">
                         <span class="status-dot"></span>
-                        Voting open
+                        IN PROGRESS
                     </span>
                 </div>
-                <div class="election-timer">
-                    <div class="timer-label">Closes in  ( ** TIMER HERE ** )</div>
-                    <div class="timer-value" id="timer-1"></div>
-                </div>
+                <!-- TODO: implement election-aware cast and standings route-->
                 <div class="election-actions">
+                     <!-- last updated? -->
                     <a href="/cast" class="btn-cast">Cast Ballot →</a>
                     <a href="/standings" class="btn-standings">View Current Standings</a>
                 </div>
             </div>
- 
+            {% endfor %}
+
             <div class="section-header">
                 <h2>Closed Elections</h2>
                 <span class="section-count" style="background: #71767a;">1</span>

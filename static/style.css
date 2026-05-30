@@ -12,7 +12,6 @@ body {
     justify-content: center;  
     align-items: center;      
     height: 50vh;
-    
 }
 
 .overlay {
@@ -82,7 +81,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 35px);
+    min-height: calc(100vh - 50px);
     background-color: #f0f0f0;
     font-family: 'Source Sans Pro', 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
     box-sizing: border-box
@@ -545,7 +544,7 @@ body {
 }
 
 .topbar-brand {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: #1b1b1b;
     letter-spacing: 0.02em;
@@ -570,7 +569,7 @@ body {
 .dashboard-body {
     max-width: 960px;
     margin: 0 auto;
-    padding: 40px 20px 60px;
+    padding: 50px 20px 60px;
 }
 
 .dashboard-body h1 {
@@ -683,7 +682,7 @@ body {
 
 @keyframes pulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+    50% { opacity: 0.25; }
 }
 
 .election-timer {

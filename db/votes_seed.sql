@@ -13,7 +13,7 @@ CREATE TABLE elections (
 );
 
 CREATE TABLE ballots (
-    id BIGSERIAL PRIMARY KEY NOT NULL UNIQUE,
+    id VARCHAR(18) PRIMARY KEY NOT NULL UNIQUE,
 
     hashed_signature TEXT NOT NULL,
     encrypted_ballot TEXT,   /* nullable until voter makes a submission */

@@ -4,13 +4,13 @@ CREATE TABLE voters (
 );
 
 CREATE TABLE ballots (
-    id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY NOT NULL UNIQUE,
 
     hashed_signature TEXT NOT NULL UNIQUE,
     encrypted_ballot TEXT,   /* nullable until voter makes a submission */
 
     /*  add last modified field?  */
-    
+
     election_id TEXT,
     round INTEGER,
 
@@ -34,5 +34,5 @@ CREATE TABLE candidates (
     election_id VARCHAR(32), 
     round_eliminated INTEGER,
 
-    UNIQUE(id, name)
+    UNIQUE(id, election_id)
 );

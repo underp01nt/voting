@@ -44,6 +44,7 @@ def insert_or_get_voter(db, hashed_signature: str):
 
     db.commit()
 
+# creates and saves voter ballot submission
 def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None, election_id=None):
     cursor = db.cursor()
 
@@ -63,70 +64,64 @@ def create_new_election(db, name: str, target_size: int) -> str:
     cursor = db.cursor()
 
     try:
-        query = """
+        make_new_election_query = """
             INSERT INTO elections (id, name, target_size, valid, round)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id
         """
 
-        valid=True; id=generate_id(5); round_number=1
-        data = (id, name, target_size, valid, round_number)
+        valid=True; election_id=generate_id(5); round_number=1
+        data = (election_id, name, target_size, valid, round_number)
 
-        cursor.execute(query, data)
+        cursor.execute(make_new_election_query, data)
         result = cursor.fetchone()
 
         if not result: raise Exception("New election insertion failed") 
-        else: election_id = result[0]
-
-        db.commit()
-        return election_id
+        else: 
+            db.commit(); return election_id
 
     except Exception:
         db.rollback()
         raise
 
 # returns candidate ID if candidate is successfully created
-def add_new_candidate(name: str, election_name: Optional[str], election_id: Optional[str], db) -> str: 
+def add_new_candidate(name: str, election_id: Optional[str], db) -> str: 
     cursor = db.cursor()
 
     try:
-        if not election_id and election_name:  # make query to elections table to find the election
-            cursor.execute("SELECT id FROM elections WHERE name = %s", (election_name,))
-            result = cursor.fetchone()
+        # TODO: check if election_id exists before insertion
 
-            if not result: 
-                raise ValueError(f"Could not find election with name {election_name}")
-            
-            election_id = result[0]
-
-        query = """
+        add_new_candidate_query = """
             INSERT INTO candidates (id, name, election_id)
             VALUES (%s, %s, %s)
             RETURNING id
         """
         candidate_id = generate_id(8)
         data = (candidate_id, name, election_id)
-        
-        cursor.execute(query, data)
-        db.commit()
+        cursor.execute(add_new_candidate_query, data)
 
-        return candidate_id
+        result = cursor.fetchone()
+
+        if not result: raise Exception("New candidate insertion failed") 
+        else: 
+            db.commit(); return candidate_id
 
     except Exception:
         db.rollback()
         raise
 
+# returns list of elections the voter is registered to vote for
 def get_current_elections(hashed_signature: str, db) -> list: 
     cursor = db.cursor()
 
     try:
         active_elections_query = \
             """
-            SELECT e.id, e.name, e.round, e.created_at
-            FROM ballots b
-            JOIN elections e ON b.election_id = e.id
-            WHERE hashed_signature = %s AND e.valid = TRUE
-            ORDER BY e.created_at DESC
+                SELECT e.id, e.name, e.round, e.created_at
+                FROM ballots b
+                JOIN elections e ON b.election_id = e.id
+                WHERE hashed_signature = %s AND e.valid = TRUE
+                ORDER BY e.created_at DESC
             """
         data = (hashed_signature,) 
         cursor.execute(active_elections_query, data)
@@ -134,4 +129,30 @@ def get_current_elections(hashed_signature: str, db) -> list:
         return cursor.fetchall()
 
     except Exception:
+        raise
+
+def register_voter_to_election(hashed_signature, election_id, db) -> str:
+    cursor = db.cursor()
+
+    try:
+        register_voter_query = \
+            """
+            INSERT INTO ballots (id, hashed_signature, election_id)
+            VALUES (%s, %s, %s)
+            RETURNING id
+            """
+        ballot_id = generate_id(6)
+        data = (ballot_id, hashed_signature, election_id)
+        cursor.execute(register_voter_query, data)
+
+        result = cursor.fetchone()
+
+        if not result:
+            raise Exception("Failed to register new ballot in DB")
+         
+        else:
+            db.commit(); return ballot_id
+
+    except Exception:
+        db.rollback()
         raise

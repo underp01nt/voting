@@ -1,9 +1,15 @@
-const allCandidates = [
-    "Candidate Alpha", "Candidate Beta", "Candidate Gamma", "Candidate Delta",
-    "Senator Epsilon", "Representative Zeta", "Governor Eta", "Mayor Theta"
-];
+// allCandidates + cart are handled by template context
 
-let cart = [];
+const submitListBtn = document.getElementById("submitListBtn");
+submitListBtn.addEventListener("click", () => {
+    const payload = {
+        election_id: electionId,
+        candidate_ids: cart.map(c => c.candidate_id)
+    };
+
+    // TODO: implement POST method for ballot submission
+    console.log(payload);
+});
 
 function showDropdown() {
     document.getElementById('search-dropdown').style.display = 'block';
@@ -21,7 +27,8 @@ function filterCandidates() {
     const dropdown = document.getElementById('search-dropdown');
     
     const filtered = allCandidates.filter(c => 
-        c.toUpperCase().includes(filter) && !cart.includes(c)
+        c.name.toUpperCase().includes(filter) && 
+        cart.every(item => item.candidate_id !== c.candidate_id) // exclude candidates already in list
     );
 
     dropdown.innerHTML = '';
@@ -30,10 +37,12 @@ function filterCandidates() {
     } else {
         filtered.forEach(candidate => {
             const div = document.createElement('div');
-            div.style.padding = '10px';
+
+            div.style.padding = '8px';
             div.style.cursor = 'pointer';
             div.style.borderBottom = '1px solid #eee';
-            div.textContent = candidate;
+            div.textContent = candidate.name;
+
             div.onmousedown = () => { // Use onmousedown to fire before onblur
                 addToCart(candidate);
                 input.value = '';
@@ -46,14 +55,15 @@ function filterCandidates() {
 }
 
 function addToCart(candidate) {
-    if (cart.includes(candidate)) return;
+    if (cart.some(c => c.candidate_id === candidate.candidate_id)) return;
+
     cart.push(candidate);
     renderCart();
     filterCandidates();
 }
 
-function removeFromCart(candidate) {
-    cart = cart.filter(c => c !== candidate);
+function removeFromCart(candidateId) {
+    cart = cart.filter(c => c.candidate_id !== candidateId);
     renderCart();
     filterCandidates();
 }
@@ -75,8 +85,8 @@ function renderCart() {
         const item = document.createElement('div');
         item.className = 'ballot-item';
         item.innerHTML = `
-            <span>${candidate}</span>
-            <button class="remove-btn" onclick="removeFromCart('${candidate}')">✕</button>
+            <span>${candidate.name}</span>
+            <button class="remove-btn" onclick="removeFromCart('${candidate.candidate_id}')">✕</button>
         `;
         cartDiv.appendChild(item);
     });

@@ -193,3 +193,18 @@ def check_voter_in_election(hashed_signature: str, election_id: str, db) -> tupl
         (hashed_signature, election_id)
     )
     return cursor.fetchone()
+
+
+def get_candidates(election_id: str, db) -> list[dict]:
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT c.name, c.id 
+        FROM candidates c
+        JOIN election_candidates ec on c.id = ec.candidate_id
+        JOIN elections e on ec.election_id = e.id
+        WHERE e.id = %s AND (ec.round_eliminated IS NULL)
+        """,
+        (election_id,)
+    )
+    return [{"name": row[0], "candidate_id": row[1]} for row in cursor.fetchall()]

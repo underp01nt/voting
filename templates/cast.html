@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="/static/js/cast.js"></script>
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
     <title>Cast Ballot - Project AIR</title>
+    <script>
+        const allCandidates = {{ all_candidates|tojson }};
+        let cart = {{ chosen_candidates|tojson }};
+        const electionId = "{{ election_id }}";
+    </script>
+    <script src="/static/js/cast.js" defer></script>
 </head>
 <body>
     <div class="auth-container">
@@ -38,7 +43,9 @@
                         <div id="search-dropdown" class="gov-dropdown" style="display: none;"></div>
                     </div>
                 </div>
- 
+                
+                <!--  ADD ELECTION NAME? -->
+
                 <!-- Right: approval cart -->
                 <div class="cart-column">
                     <div class="cart-header">
@@ -55,7 +62,7 @@
             <div class="auth-footer" style="display: flex; justify-content: space-between; align-items: center;">
                 <a href="/" class="back-link">← Go back</a>
                 <div id="action-container" style="display: none;">
-                    <button class="btn btn-primary" style="border-radius: 999px; padding: 10px 24px; cursor: pointer;">Submit Approval List</button>
+                    <button class="btn btn-primary" id="submitListBtn" style="border-radius: 999px; padding: 10px 24px; cursor: pointer;">Submit Approval List</button>
                 </div>
             </div>
         </div>

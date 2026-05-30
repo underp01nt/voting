@@ -3,7 +3,7 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from services.processing import get_elections, check_voter_in_election
+from services.processing import get_elections, check_voter_in_election, get_candidates
 from typing import Optional
 
 router = APIRouter()
@@ -64,7 +64,7 @@ def dashboard(request: Request, db=Depends(get_votes_db)):
         )
     else: return RedirectResponse("/", status_code=303)
 
-@router.get("/cast")
+@router.get("/cast")            # id in this context is election_id
 def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature")
 
@@ -72,10 +72,15 @@ def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
     elif not check_voter_in_election(hashed_signature, id, db):
         raise HTTPException(403, "Not registered for this election")
 
+    all_candidates = get_candidates(id, db); print(all_candidates)
     return templates.TemplateResponse(
             request=request, 
             name="cast.html",
-            context={}
+            context={
+                "all_candidates": all_candidates,
+                "chosen_candidates": [],   # TODO: work on voter resubmission
+                "election_id": id,
+            }
         )
 
 ####################  TEST ROUTES  #######################

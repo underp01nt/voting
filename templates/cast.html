@@ -16,6 +16,15 @@
 <body>
     <div class="auth-container">
         <div class="auth-card ballot-card">
+            <div class="cast-meta">
+                <div><strong>{{ election_name }} | Round {{ round_number }}</strong></div>
+                {% if last_updated %}
+                    <div class="last-updated">
+                        Last updated: {{ last_updated }}
+                    </div>
+                {% endif %}
+            </div>
+
             <h1>Cast Your Ballot</h1>
             <p class="subtitle">Select candidates to build your approval list, then submit.</p>
             <hr class="gov-divider">

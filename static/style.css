@@ -807,3 +807,29 @@ body {
     color: white;
     cursor: not-allowed;
 }
+
+.ballot-card {
+    position: relative;
+}
+
+.cast-meta {
+    position: absolute;
+    top: 2.0rem;
+    right: 2.0rem;
+
+    text-align: right;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.election-name {
+    font-weight: 600;
+    color: #222;
+    margin-bottom: 0.2rem;
+}
+
+.last-updated {
+    margin-top: 0.2rem;
+    font-size: 0.8rem;
+    color: #888;
+}

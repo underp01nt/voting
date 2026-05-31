@@ -77,18 +77,11 @@ def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
 
     election_name, _, encrypted_ballot, last_updated, round_number = ballot
     all_candidates = get_candidates(id, db)
-    chosen_candidates = ast.literal_eval(aes_decrypt(aesgcm, encrypted_ballot))  if encrypted_ballot else []
 
-    """
-        WANT: 
-            chosen_candidates: list[dict]
+    # aes_decrypt returns string, so eval that
+    chosen_candidates = ast.literal_eval(aes_decrypt(aesgcm, encrypted_ballot)) if encrypted_ballot else []
 
-        HAVE:
-            chosen_candidates = [id_A, id_b]
-            all_candidates = [{name: "", candidate_id: ""}, ...]    
-    """
-
-    if chosen_candidates:
+    if chosen_candidates:  # if not empty, use current list to get list of name and id mappings 
         candidate_lookup = {candidate["candidate_id"]: candidate for candidate in all_candidates}
         sol_chosen_candidates: list[dict[str, str]] = []
 
@@ -113,23 +106,9 @@ def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
 
 ####################  TEST ROUTES  #######################
 
-@router.get("/test-cast", response_class=HTMLResponse)
-def test_cast(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="cast.html",
-    )
-
 @router.get("/test-token", response_class=HTMLResponse)
 def get_token(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="token.html",
-    )
-
-@router.get("/test-tiers", response_class=HTMLResponse)
-def test_tiers(request: Request):
-    return templates.TemplateResponse(
-        request=request,
-        name="tiers.html"
     )

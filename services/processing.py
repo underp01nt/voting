@@ -210,6 +210,19 @@ def get_candidates(election_id: str, db) -> list[dict]:
     )
     return [{"name": row[0], "candidate_id": row[1]} for row in cursor.fetchall()]
 
+def get_existing_ballot(hashed_signature, election_id, db):
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT e.name, b.id, b.encrypted_ballot, b.last_updated, b.round
+        FROM ballots b
+        JOIN elections e on e.id = b.election_id
+        WHERE hashed_signature = %s AND election_id = %s
+        """, 
+        (hashed_signature, election_id)
+    )
+    return cursor.fetchone()
+
 def submit_ballot(hashed_signature: str, election_id: str, candidate_ids: list[str], round_number: int, db):
     try:
         cursor = db.cursor()

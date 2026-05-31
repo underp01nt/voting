@@ -3,7 +3,8 @@ from fastapi import APIRouter, Request, Depends
 from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from services.processing import get_elections, check_voter_in_election, get_candidates
+from services.crypto import aesgcm, aes_decrypt
+from services.processing import get_elections, get_candidates, get_existing_ballot
 from typing import Optional
 
 router = APIRouter()
@@ -67,19 +68,26 @@ def dashboard(request: Request, db=Depends(get_votes_db)):
 @router.get("/cast")            # id in this context is election_id
 def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature")
-
     if not hashed_signature: raise HTTPException(401, "Not authenticated")
-    elif not check_voter_in_election(hashed_signature, id, db):
-        raise HTTPException(403, "Not registered for this election")
 
-    all_candidates = get_candidates(id, db); print(all_candidates)
+    # existing ballot w/o encrypted_ballot => voter is registered for this election but no submission
+    ballot = get_existing_ballot(hashed_signature, id, db)
+    if not ballot: raise HTTPException(403, "Not registered for this election")
+
+    election_name, _, encrypted_ballot, last_updated, round_number = ballot
+    all_candidates = get_candidates(id, db)
+    chosen_candidates = aes_decrypt(aesgcm, encrypted_ballot)
+
     return templates.TemplateResponse(
             request=request, 
             name="cast.html",
             context={
                 "all_candidates": all_candidates,
-                "chosen_candidates": [],   # TODO: work on voter resubmission
+                "chosen_candidates": chosen_candidates,   # TODO: work on voter resubmission
                 "election_id": id,
+                "last_updated": last_updated,
+                "election_name": election_name, 
+                "round_number": round_number,
             }
         )
 

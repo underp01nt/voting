@@ -15,7 +15,6 @@ const submitListBtn = document.getElementById("submitListBtn");
 submitListBtn.addEventListener("click", () => {
     const payload = {candidate_ids: cart.map(c => c.candidate_id), round_number: 1};
     
-    console.log(payload)
     // reminder: event listener is not async, so need to wrap in own invoked function
     (async () => { 
         const data = await submitBallot(payload); 

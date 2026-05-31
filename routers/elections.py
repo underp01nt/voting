@@ -1,12 +1,14 @@
 from db.factory import get_votes_db
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from services.processing import (
     create_new_election, 
     add_new_candidate, 
     register_voter_to_election,
-    nominate_candidate
+    nominate_candidate, 
+    check_voter_in_election,
+    submit_ballot
 )
 from typing import Optional
 
@@ -28,6 +30,10 @@ class Voter(BaseModel):
 class Nominee(BaseModel):
     candidate_id: str
     election_id : str
+
+class Ballot(BaseModel):
+    candidate_ids: list[str]
+    round_number: int
     
 @router.post("/new")
 def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
@@ -38,7 +44,7 @@ def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
             target_size=payload.target_size, 
         )
 
-        return {"id": election_id, "message": "Election was created successfully!"}
+        return {"id": election_id, "message": "Election was successfully created"}
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
@@ -70,5 +76,24 @@ def nominate_candidate_route(payload: Nominee, db=Depends(get_votes_db)):
     try: 
         nominate_candidate(db, candidate_id=payload.candidate_id, election_id=payload.election_id)
         return {"message": f"Nominated candidate {payload.candidate_id} for election {payload.election_id}"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
+
+@router.post("/{election_id}/ballot")
+def submit_or_update_ballot_route(request: Request, 
+                                  payload: Ballot,
+                                  election_id: str,
+                                  db=Depends(get_votes_db)
+                                  ):
+    try:
+        hashed_signature = request.session.get("hashed_signature", None)
+        if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
+            raise HTTPException(status_code=403, detail="Not authorized for this election")
+
+        submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
+        
+        # TODO: implement successful user redirect
+        return {"msg": "Ballot submission successful"}
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e

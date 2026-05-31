@@ -91,8 +91,8 @@ def submit_or_update_ballot_route(request: Request,
             raise HTTPException(status_code=403, detail="Not authorized for this election")
 
         submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
-        
-        # TODO: implement successful user redirect
+        request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
+
         return {"msg": "Ballot submission successful"}
 
     except Exception as e:

@@ -833,3 +833,45 @@ body {
     font-size: 0.8rem;
     color: #888;
 }
+
+.toast-success {
+    position: fixed;
+    padding: 6px 12px;
+
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    max-width: 350px;
+    width: 40%;
+
+    background: #1f7a1f;
+    color: white;
+
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 400;
+
+    animation: toastFade 4s forwards;
+}
+
+@keyframes toastFade {
+    0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    85% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+.toast-close {
+    position: absolute;
+    top: 50%;
+    right: 18px;
+    transform: translateY(-40%);
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    line-height: 1;
+}

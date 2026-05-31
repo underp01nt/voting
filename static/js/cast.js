@@ -17,12 +17,24 @@ async function submitBallot(payload) {
 
 const submitListBtn = document.getElementById("submitListBtn");
 submitListBtn.addEventListener("click", () => {
+    const confirmed = confirm(
+        "Submit this ballot?\n\n" +
+        "You may return later and make changes before the election closes."
+    );
+
+    if (!confirmed) return;
+
     const payload = {candidate_ids: cart.map(c => c.candidate_id), round_number: 1};
     
     // reminder: event listener is not async, so need to wrap in own invoked function
-    (async () => { 
-        const data = await submitBallot(payload); 
-        //console.log(data);
+    (async () => {
+        try {
+            const data = await submitBallot(payload); //console.log(data);
+            window.location.href = "/";
+        } catch (err) {
+            alert("Failed to submit ballot.");
+            console.error(err);
+        } 
     })();
 
 });

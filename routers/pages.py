@@ -56,13 +56,14 @@ def token(request: Request):
 @router.get("/dashboard", response_class=HTMLResponse)
 def dashboard(request: Request, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
+    successful_submission = request.session.pop("successful_submission", None)
     if hashed_signature:
         active_elections: list[dict] = get_elections(hashed_signature, db)
         # print(active_elections)
         return templates.TemplateResponse(
             request=request, 
             name="dashboard.html",
-            context = {"active_elections": active_elections}
+            context = {"active_elections": active_elections, "successful_submission": successful_submission}
         )
     else: return RedirectResponse("/", status_code=303)
 

@@ -7,6 +7,13 @@
     <title>Dashboard - Project AIR</title>
 </head>
 <body>
+    {% if successful_submission %}
+        <div id="toast" class="toast-success">
+            <span>✓ {{ successful_submission }}</span>
+            <button class="toast-close" onclick="closeToast()">&times;</button>
+        </div>
+    {% endif %}
+
     <div class="dashboard-container">
         <div class="dashboard-topbar">
             <span class="topbar-brand">Project <span>AIR</span></span>
@@ -63,4 +70,7 @@
         </div>
     </div>
 </body>
+<script>
+    function closeToast() { document.getElementById("toast").remove(); }
+</script>
 </html>

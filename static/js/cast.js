@@ -1,14 +1,27 @@
 // allCandidates + cart are handled by template context
+// console.log(electionId)
+
+async function submitBallot(payload) {
+    const response = await fetch(`/elections/${electionId}/ballot`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+    }); const data = await response.json();
+
+    return data;
+}
 
 const submitListBtn = document.getElementById("submitListBtn");
 submitListBtn.addEventListener("click", () => {
-    const payload = {
-        election_id: electionId,
-        candidate_ids: cart.map(c => c.candidate_id)
-    };
+    const payload = {candidate_ids: cart.map(c => c.candidate_id), round_number: 1};
+    
+    console.log(payload)
+    // reminder: event listener is not async, so need to wrap in own invoked function
+    (async () => { 
+        const data = await submitBallot(payload); 
+        //console.log(data);
+    })();
 
-    // TODO: implement POST method for ballot submission
-    console.log(payload);
 });
 
 function showDropdown() {

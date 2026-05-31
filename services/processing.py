@@ -1,9 +1,10 @@
 from ranked_pairs import ranked_pairs
+from services.crypto import aesgcm, aes_encrypt
 from services.viz import build_rank_table, build_heat_map
 from services.utils import generate_id
 from io import StringIO
 from typing import Optional
-import time,csv
+import csv, time, json
 
 # convert data to text, then make text reader iterable per row
 def parse_csv(data: bytes) -> list[list[str]]:
@@ -181,7 +182,7 @@ def nominate_candidate(db, candidate_id: str, election_id: str):
         db.rollback()
         raise
 
-def check_voter_in_election(hashed_signature: str, election_id: str, db) -> tuple:
+def check_voter_in_election(hashed_signature: str, election_id: str, db) -> Optional[tuple]:
     cursor = db.cursor()
     cursor.execute(
         """
@@ -208,3 +209,19 @@ def get_candidates(election_id: str, db) -> list[dict]:
         (election_id,)
     )
     return [{"name": row[0], "candidate_id": row[1]} for row in cursor.fetchall()]
+
+def submit_ballot(hashed_signature: str, election_id: str, candidate_ids: list[str], round_number: int, db):
+    try:
+        cursor = db.cursor()
+        cursor.execute(
+            """
+                UPDATE ballots
+                SET encrypted_ballot = %s, last_updated = NOW(), round = %s
+                WHERE hashed_signature = %s AND election_id = %s
+            """,
+            (aes_encrypt(aesgcm, json.dumps(candidate_ids)), round_number, hashed_signature, election_id)
+        ); db.commit()
+    
+    except Exception:
+        db.rollback()
+        raise

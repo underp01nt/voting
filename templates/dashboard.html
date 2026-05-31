@@ -28,7 +28,7 @@
  
             <div class="section-header">
                 <h2>Active Elections</h2>
-                <span class="section-count">1</span>
+                <span class="section-count">{{ active_elections | length }}</span>
             </div>
  
             {% for election in active_elections %}
@@ -44,7 +44,17 @@
                 <!-- TODO: implement election-aware cast and standings route-->
                 <div class="election-actions">
                     <a href="/cast?id={{ election.id }}" class="btn-cast">Go to ballot →</a>
-                    <a href="/standings?id={{ election.id }}" class="btn-standings">View Current Standings</a>
+                    {% if election.last_updated %}
+                        <a href="/elections/{{ election.id }}/standings"
+                        class="btn-standings">
+                            View Current Standings
+                        </a>
+                    {% else %}
+                        <span class="btn-standings btn-standings-disabled"
+                            title="Ballot must be submitted first to view standings">
+                            View Current Standings
+                        </span>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}

@@ -120,7 +120,7 @@ def get_elections(hashed_signature: str, db) -> list[dict]:
                     SELECT COUNT(*)
                     FROM election_candidates ec
                     WHERE ec.election_id = e.id
-                )
+                ), b.last_updated
                 FROM ballots b
                 JOIN elections e ON b.election_id = e.id
                 WHERE hashed_signature = %s AND e.valid = TRUE
@@ -135,6 +135,7 @@ def get_elections(hashed_signature: str, db) -> list[dict]:
             "round": row[2],
             "created_at": row[3],
             "count": row[4],
+            "last_updated": row[5]
         } for row in cursor.fetchall()]
 
     except Exception:
@@ -195,7 +196,7 @@ def check_voter_in_election(hashed_signature: str, election_id: str, db) -> Opti
     )
     return cursor.fetchone()
 
-# returns list of candidate name-ID mapping
+# returns list of name and id mappings
 def get_candidates(election_id: str, db) -> list[dict]:
     cursor = db.cursor()
     cursor.execute(

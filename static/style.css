@@ -137,7 +137,7 @@ body {
 .subtitle {
     color: #565c65;
     margin-bottom: 5px;
-    font-size: 1.1rem;
+    font-size: 1.0rem;
 }
 
 .auth-buttons {
@@ -874,4 +874,18 @@ body {
     font-size: 1.1rem;
     cursor: pointer;
     line-height: 1;
+}
+
+.btn-standings-disabled {
+    color: #777;
+
+    cursor: not-allowed;
+    pointer-events: auto; 
+}
+
+.btn-standings-disabled:hover {
+    color: #777;
+
+    transform: none;
+    box-shadow: none;
 }

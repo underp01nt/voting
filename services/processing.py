@@ -195,7 +195,7 @@ def check_voter_in_election(hashed_signature: str, election_id: str, db) -> Opti
     )
     return cursor.fetchone()
 
-
+# returns list of candidate name-ID mapping
 def get_candidates(election_id: str, db) -> list[dict]:
     cursor = db.cursor()
     cursor.execute(

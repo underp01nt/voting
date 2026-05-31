@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from services.crypto import aesgcm, aes_decrypt
 from services.processing import get_elections, get_candidates, get_existing_ballot
 from typing import Optional
+import ast
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -76,16 +77,35 @@ def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
 
     election_name, _, encrypted_ballot, last_updated, round_number = ballot
     all_candidates = get_candidates(id, db)
-    chosen_candidates = aes_decrypt(aesgcm, encrypted_ballot)
+    chosen_candidates = ast.literal_eval(aes_decrypt(aesgcm, encrypted_ballot))  if encrypted_ballot else []
+
+    """
+        WANT: 
+            chosen_candidates: list[dict]
+
+        HAVE:
+            chosen_candidates = [id_A, id_b]
+            all_candidates = [{name: "", candidate_id: ""}, ...]    
+    """
+
+    if chosen_candidates:
+        candidate_lookup = {candidate["candidate_id"]: candidate for candidate in all_candidates}
+        sol_chosen_candidates: list[dict[str, str]] = []
+
+        for chosen_candidate_id in chosen_candidates:
+            candidate = candidate_lookup[chosen_candidate_id]
+            sol_chosen_candidates.append({"name": candidate["name"], "candidate_id": chosen_candidate_id})
+
+        chosen_candidates = sol_chosen_candidates
 
     return templates.TemplateResponse(
             request=request, 
             name="cast.html",
             context={
                 "all_candidates": all_candidates,
-                "chosen_candidates": chosen_candidates,   # TODO: work on voter resubmission
+                "chosen_candidates": chosen_candidates,  
                 "election_id": id,
-                "last_updated": last_updated,
+                "last_updated": last_updated or None,
                 "election_name": election_name, 
                 "round_number": round_number,
             }

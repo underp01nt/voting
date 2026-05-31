@@ -17,7 +17,7 @@ CREATE TABLE ballots (
 
     hashed_signature TEXT NOT NULL,
     encrypted_ballot TEXT,   /* nullable until voter makes a submission */
-    last_updated TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    last_updated TIMESTAMPTZ,
     election_id TEXT REFERENCES elections(id),
     round INTEGER,
 

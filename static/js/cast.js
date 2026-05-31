@@ -1,6 +1,10 @@
 // allCandidates + cart are handled by template context
 // console.log(electionId)
 
+document.addEventListener("DOMContentLoaded", () => {
+    renderCart();
+});
+
 async function submitBallot(payload) {
     const response = await fetch(`/elections/${electionId}/ballot`, {
         method: "POST",

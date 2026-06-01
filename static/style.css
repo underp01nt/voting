@@ -965,6 +965,7 @@ body {
 .candidate-id {
     font-family: monospace;
     color: #666;
+    font-size: 16px;
 }
 
 .approvals-col {

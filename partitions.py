@@ -175,7 +175,7 @@ def ranked_partitions(alternatives:list, votes:list[list]):
     print(f"Total Time: {end-start} s")
     return output
 
-def ranked_paritions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
+def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
     pairs = pairwise_comparison(alternatives, votes)
     for a,b in pairs.keys():
         pairs[(a,b)] += (pairs[(a,b)]-pairs[(b,a)])
@@ -238,7 +238,7 @@ def ranked_paritions_with_margins(alternatives:list, votes:list[list]) -> list[s
     return output
 
 
-def timed_ranked_paritions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
+def timed_ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
     start = time.perf_counter()
     # pairs = pairwise_margins(alternatives, votes)
     # print(pairs)

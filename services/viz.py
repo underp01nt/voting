@@ -17,13 +17,13 @@ def build_heat_map(candidates: list[str], ballots: list[list[str]]) -> go.Figure
     )
     return heat
 
-def build_rank_table(ranking: list[str]) -> go.Figure:
-    num_candidates = len(ranking)
-    rank_indices = list(range(1, num_candidates + 1))
+def build_rank_table(ranking: list[set]) -> go.Figure:
+    num_parts = len(ranking)
+    rank_indices = list(range(1, num_parts + 1))
     fig = go.Figure(data=go.Table(
         header=dict(values=["Rank", "Candidate"]),
         cells=dict(values=[rank_indices, ranking])
     ))
 
-    fig.update_layout(title={"text": "Final Ranking", "x": 0.5}, height=180 + num_candidates * 30)
+    fig.update_layout(title={"text": "Final Ranking", "x": 0.5}, height=180 + num_parts * 30)
     return fig

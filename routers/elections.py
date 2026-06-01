@@ -104,7 +104,11 @@ def submit_or_update_ballot_route(request: Request,
 def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
-    elif has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
+    elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
 
-    # TODO: implement standings template
-    return get_standings(election_id, round, db)
+    return templates.TemplateResponse(
+        request=request, 
+        name="standings.html", 
+        context={"standings": get_standings(election_id, round, db), "election_id": election_id, "round": round} 
+    )
+    

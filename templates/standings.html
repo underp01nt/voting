@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Election Standings - Project AIR</title>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card ballot-card">
+
+            <div class="cast-meta">
+                <div class="election-meta">
+                <div><strong>Election ID: {{ election_id }}</strong></div>
+                <div class="election-id"></div>
+
+                <div class="round-label">
+                    Round {{ round }}
+                </div>
+            </div>
+
+                {% if last_updated %}
+                <div class="last-updated">
+                    Last updated: {{ last_updated }}
+                </div>
+                {% endif %}
+            </div>
+
+            <h1>Current Standings</h1>
+            <div class="standings-container">
+                <table class="standings-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Candidate</th>
+                            <th>Candidate ID</th>
+                            <th class="approvals-col">Approvals</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for candidate in standings %}
+                        <tr {% if loop.first %}class="leader-row"{% endif %}>
+                            <td>{{ loop.index }}</td>
+                            <td class="candidate-name">{{ candidate.name }}</td>
+                            <td class="candidate-id">{{ candidate.candidate_id }}</td>
+                            <td class="approvals-col">{{ candidate.num_approvals }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <br>
+            <div class="auth-footer">
+                <a href="/" class="back-link">
+                    ← Go back
+                </a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

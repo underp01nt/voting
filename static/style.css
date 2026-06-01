@@ -6,6 +6,7 @@ body {
     background-color: #f0f0f0;
 }
 
+
 .index {
     display: flex;
     flex-direction: column;
@@ -888,4 +889,91 @@ body {
 
     transform: none;
     box-shadow: none;
+}
+
+.standings-title {
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.election-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.election-id {
+    font-family: monospace;
+    color: #555;
+}
+
+.round-label {
+    margin-top: 4px;
+    color: #0b5cab;
+    font-weight: 600;
+}
+
+.standings-container {
+    margin-top: 1rem;
+}
+
+.standings-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #d9dee5;
+    border-radius: 12px;
+}
+
+.standings-table thead th {
+    background: #f5f7fa;
+    padding: 14px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: left;
+    border-bottom: 1px solid #d9dee5;
+}
+
+.standings-table td {
+    padding: 14px 18px;
+    border-bottom: 1px solid #edf1f5;
+}
+
+.standings-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.standings-table tbody tr:hover {
+    background: #fafbfd;
+}
+
+.standings-table th.approvals-col,
+.standings-table td.approvals-col {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.leader-row {
+    background: #f8fbff;
+}
+
+.candidate-id {
+    font-family: monospace;
+    color: #666;
+}
+
+.approvals-col {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.candidate-name {
+    font-family: "Georgia", "Times New Roman", serif;
+    font-weight: 500;
+    color: #1f2937;
 }

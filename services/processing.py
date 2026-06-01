@@ -1,5 +1,6 @@
+from collections import Counter
 from ranked_pairs import ranked_pairs
-from services.crypto import aesgcm, aes_encrypt
+from services.crypto import aesgcm, aes_encrypt, aes_decrypt
 from services.viz import build_rank_table, build_heat_map
 from services.utils import generate_id
 from io import StringIO
@@ -239,3 +240,53 @@ def submit_ballot(hashed_signature: str, election_id: str, candidate_ids: list[s
     except Exception:
         db.rollback()
         raise
+
+def has_submitted_ballot(hashed_signature: str, election_id: str, db) -> bool:
+    cursor = db.cursor()
+    cursor.execute(
+        """
+        SELECT 1
+        FROM ballots
+        WHERE hashed_signature = %s AND election_id = %s AND encrypted_ballot IS NOT NULL
+        """,
+        (hashed_signature, election_id)
+    )
+    return cursor.fetchone() is not None
+
+def get_standings(election_id: str, round_number: int, db) -> list[dict]:
+    try:
+        cursor = db.cursor()
+        # get ballots for the election at the current round
+        cursor.execute(
+            """
+                SELECT b.encrypted_ballot
+                FROM ballots b
+                WHERE election_id = %s AND round = %s AND encrypted_ballot IS NOT NULL
+            """,
+            (election_id, round_number)
+        )
+
+        encrypted_ballots = cursor.fetchall()
+
+        match round_number:
+            case 1: 
+                counts = Counter()
+                for (encrypted_ballot,) in encrypted_ballots:
+                    candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
+                    for candidate_id in candidate_ids:
+                        counts[candidate_id] += 1
+
+                candidate_lookup = {c["candidate_id"]: c["name"] for c in get_candidates(election_id, db)}
+                standings = [{
+                                "name": candidate_lookup[candidate_id],
+                                "candidate_id": candidate_id,
+                                "num_approvals": num_approvals, 
+                             }
+                            for candidate_id, num_approvals in counts.items()]
+                standings.sort(key=lambda x: x["num_approvals"], reverse=True)
+                # print(counts); print(standings)
+
+                return standings
+
+            case _: raise Exception("Round not yet implemented")  # TODO: work on multiple round
+    except Exception: raise

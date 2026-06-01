@@ -8,7 +8,9 @@ from services.processing import (
     register_voter_to_election,
     nominate_candidate, 
     check_voter_in_election,
-    submit_ballot
+    submit_ballot,
+    get_standings,
+    has_submitted_ballot,
 )
 from typing import Optional
 
@@ -97,3 +99,12 @@ def submit_or_update_ballot_route(request: Request,
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+    
+@router.get("/{election_id}/standings")
+def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
+    hashed_signature = request.session.get("hashed_signature", None)
+    if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
+    elif has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
+
+    # TODO: implement standings template
+    return get_standings(election_id, round, db)

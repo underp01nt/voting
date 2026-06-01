@@ -45,7 +45,7 @@
                 <div class="election-actions">
                     <a href="/cast?id={{ election.id }}" class="btn-cast">Go to ballot →</a>
                     {% if election.last_updated %}
-                        <a href="/elections/{{ election.id }}/standings"
+                        <a href="/elections/{{ election.id }}/standings?round={{ election.round}}"
                         class="btn-standings">
                             View Current Standings
                         </a>

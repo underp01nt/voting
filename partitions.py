@@ -175,7 +175,70 @@ def ranked_partitions(alternatives:list, votes:list[list]):
     print(f"Total Time: {end-start} s")
     return output
 
-def ranked_paritions_with_margins(alternatives:list, votes:list[list]):
+def ranked_paritions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
+    pairs = pairwise_comparison(alternatives, votes)
+    for a,b in pairs.keys():
+        pairs[(a,b)] += (pairs[(a,b)]-pairs[(b,a)])
+    # Group pairs based on beat strength
+    grouped_pairs = {} # strength:[edges]
+    for tup,val in pairs.items():
+        grouped_pairs.setdefault(val,[]).append(tup)
+    
+    vertices = {} # vertex:root
+    edges = set() # (root1, root2)
+    
+    for s in sorted(grouped_pairs.keys(), reverse=True):
+        if s < 0:
+            continue
+        print(f"{s}: {len(set(vertices.values()))} roots,    {len(edges)} edges,    {len(grouped_pairs[s])} new edges")
+        
+        # Determine and store graph connections for easy access
+        can_reach = {v:set() for v in vertices.values()}
+        for edge in edges:
+            a,b = edge
+            can_reach[a].add(b)
+        searched = set()
+        for a in can_reach.keys():
+            recursive_update(a, can_reach, searched)
+        
+        # Check if each pairwise win of strength s creates a cycle with stronger pairs 
+        old_vertices = set(v for v in vertices.keys())
+        for edge in grouped_pairs[s]:
+            u, v = edge
+            if u in old_vertices and v in old_vertices and vertices[u] in can_reach[vertices[v]]:
+                continue
+            if u not in vertices.keys():
+                vertices[u] = u
+            if v not in vertices.keys():
+                vertices[v] = v
+            edges.add((vertices[u],vertices[v]))
+        
+        # Collect unbreakable connected components (those with multiple edges of the same strength)
+        components = get_connected_components(vertices.values(), edges)
+        
+        # update pointers to roots
+        for root in components.keys():
+            for vertex in components[root]:
+                vertices[vertex] = root
+        for vertex in vertices.keys():
+            vertices[vertex] = vertices[vertices[vertex]]
+
+        # update edges to match roots
+        temp = set()
+        for edge in edges:
+            u,v = edge
+            if vertices[u] != vertices[v]:
+                temp.add((vertices[u], vertices[v]))
+        edges = temp
+        
+    # sort roots in DAG and package into list of sets
+    sorted_roots, _ = topological_sort(set(vertices.values()), edges)
+    # print(sorted_roots)
+    output = [set(v for v in vertices if vertices[v] == root) for root in sorted_roots]
+    return output
+
+
+def timed_ranked_paritions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
     start = time.perf_counter()
     # pairs = pairwise_margins(alternatives, votes)
     # print(pairs)
@@ -273,7 +336,7 @@ def greedy_partitions(alternatives:list, votes:list[list]):
     
     pass
 
-def process_partition(partition:list[set], targets:list[int]):
+def process_partition(partition:list[set], targets:list[int]) -> tuple[list[set], list[int]]:
     diff = sum(len(part) for part in partition) - sum(targets)
     if diff > 0:
         targets.append(diff)

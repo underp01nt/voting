@@ -1,5 +1,5 @@
 from collections import Counter
-from ranked_pairs import ranked_pairs
+from partitions import ranked_partitions_with_margins
 from services.crypto import aesgcm, aes_encrypt, aes_decrypt
 from services.viz import build_rank_table, build_heat_map
 from services.utils import generate_id
@@ -16,15 +16,15 @@ def parse_csv(data: bytes) -> list[list[str]]:
 # count all votes using ranked_pairs, returns results dict for template context
 def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
     results = {}
-
+    
     start = time.time()
-    ranked_pairs_result = ranked_pairs(candidates, ballots)
+    ranked_partitions_result = ranked_partitions_with_margins(candidates, ballots)
     end = time.time()
 
-    fig = build_rank_table(ranked_pairs_result)
+    fig = build_rank_table(ranked_partitions_result)
     heat = build_heat_map(candidates, ballots)
 
-    results["Ranked pairs"] = {
+    results["Ranked Partitions"] = {
         "duration": end - start,
         "fig": fig.to_html(full_html=False, config={"responsive": True}),
         "heat": heat.to_html(full_html=False, config={"responsive": True})

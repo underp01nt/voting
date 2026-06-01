@@ -16,8 +16,9 @@ async def upload(request: Request, file: UploadFile=File(...), algorithms: Optio
     try:
         data = await file.read()
         rows = parse_csv(data)  # validate maybe?
-
-        candidates, ballots = rows[0], rows[1:]
+        
+        # temp fix: need ballots to be lists of sets of candidates
+        candidates, ballots = rows[0], [[set(row), set(c for c in candidates if c not in row)] for row in rows[1:]] 
         election_outcome = count_votes(candidates, ballots)
             
     except Exception as e:

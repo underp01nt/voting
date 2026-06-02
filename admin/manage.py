@@ -3,7 +3,11 @@ import argparse, requests
 ELECTIONS_MGMT_URL = "http://127.0.0.1:8000/elections"
 
 def post(path: str, payload: dict) -> dict[str, str]:
-    complete_path = f"{ELECTIONS_MGMT_URL}{path}"
+    print("POST URL:", path)
+    print("POST DATA:", payload)
+    print()
+
+    complete_path = ELECTIONS_MGMT_URL + path
     response = requests.post(complete_path, json=payload, timeout=5)
     response.raise_for_status()
     return response.json()

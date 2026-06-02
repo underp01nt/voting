@@ -169,16 +169,22 @@ def register_voter_to_election(hashed_signature, election_id, db) -> str:
         raise
 
 # nominates a candidate for a specific election
-def nominate_candidate(db, candidate_id: str, election_id: str):
+def nominate_candidate(db, candidate_id: str, election_id: str) -> dict[str, str]:
     try:
         cursor = db.cursor()
         nominate_query = \
             """
                 INSERT INTO election_candidates (election_id, candidate_id)
                 VALUES (%s, %s)
+                RETURNING election_id, candidate_id
             """
         cursor.execute(nominate_query, (election_id, candidate_id))
-        db.commit()
+        row = cursor.fetchone()
+
+        if row is None: raise ValueError("Nomination was not created")
+        else: db.commit()
+
+        return {"election_id": row[0], "candidate_id": row[1]}
 
     except Exception:
         db.rollback()

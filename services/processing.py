@@ -222,7 +222,7 @@ def get_existing_ballot(hashed_signature, election_id, db):
     cursor = db.cursor()
     cursor.execute(
         """
-        SELECT e.name, b.id, b.encrypted_ballot, b.last_updated, b.round
+        SELECT e.name, b.id, b.encrypted_ballot, b.last_updated, e.round
         FROM ballots b
         JOIN elections e on e.id = b.election_id
         WHERE hashed_signature = %s AND election_id = %s

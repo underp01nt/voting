@@ -208,8 +208,9 @@ def partition_trials(A=500, V=25, target=[50,10]):
     # trial_strata.to_csv("./data/partitions/weighted_strata.csv", index=False)\
 
 if __name__ == "__main__":
-    ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
+    # ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
     
+    print(ranked_partitions_with_margins(['A', 'B', 'C', 'D'], [['A,B', 'C,D'], ['A', 'B', 'C', 'D'], ['B,D', 'A', 'C'], ['B', 'A,D,C'], ['C', 'D', 'A', 'B']]))
     # ranked_pairs_ranked_partitions_equivalence()
     
     # pairs = pairwise_margins(

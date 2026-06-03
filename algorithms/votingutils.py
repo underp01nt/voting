@@ -71,13 +71,14 @@ def matrix_of_majorities(candidates:list, votes:list[list]):
     return matrix, candidates # basis
 
 def generate_random_votes(candidates, n):
+    from random import choice
     preferences = []
     for _ in range(n):
         remaining_candidates = [c for c in candidates]
         vote = []
         
         while (remaining_candidates):
-            candidate = np.random.choice(remaining_candidates)
+            candidate = choice(remaining_candidates)
             vote.append(candidate)
             remaining_candidates.remove(candidate)
         preferences.append(vote)
@@ -95,7 +96,6 @@ def generate_random_approval_votes(alternatives, n, approval_prob=0.1):
                 vote[1].add(alt)
         votes.append(vote)
     return votes
-
 
 def generate_random_approval_disapproval_votes(alternatives, n, approval_prob=0.1, disapproval_prob=0.1):
     votes = []

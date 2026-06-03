@@ -1,6 +1,6 @@
 import networkx as nx
-from votingutils import pairwise_wins
-from partitions import get_connected_components
+from algorithms.votingutils import pairwise_wins
+from algorithms.partitions import get_connected_components
 
 # Returns a NetworkX graph of pairwise comparisons with edges labeled by win strength
 def beat_graph(candidates:list, votes:list):

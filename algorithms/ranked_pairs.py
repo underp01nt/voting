@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from votingutils import pairwise_comparison, matrix_of_majorities
+from algorithms.votingutils import pairwise_margins, matrix_of_majorities
 
 # Basically a topological sort of the DAG, except it might not be
 # connected and what even are vertices?
@@ -34,18 +34,11 @@ def topological_sort(vertices:list, edges:list):
                 
     return final, edges
 
-def ranked_pairs(candidates:list, votes:list):
-    pairs = {
-        (a, b) : 0 for a in candidates for b in candidates if a != b
-        }
-    
-    for vote in votes:
-        for i in range(len(vote)-1):
-            for j in range(i+1, len(vote)):
-                pairs[(vote[i], vote[j])] += 1
-    
-    sorted_pairs = sorted(pairs.items(), key=lambda x: (x[1], np.random.rand()), reverse=True)
-    sorted_wins = sorted_pairs[:len(sorted_pairs)//2]
+def ranked_pairs(candidates:list, votes:list) -> list:
+    pairs = pairwise_margins(candidates, votes)
+    sorted_pairs = sorted((pair for pair,margin in pairs.items() if margin>=0), key=lambda x: (pairs[x], np.random.rand()), reverse=True)
+    # sorted_wins = sorted_pairs[:len(sorted_pairs)//2]
+    sorted_wins = sorted_pairs
     
     vertices = []
     edges = []
@@ -53,11 +46,11 @@ def ranked_pairs(candidates:list, votes:list):
     while i < len(sorted_wins):
         try:
             vertices, edges = topological_sort(
-                vertices + [v for v in sorted_wins[i][0] if v not in vertices],
-                edges + [sorted_wins[i][0]]
+                vertices + [v for v in sorted_wins[i] if v not in vertices],
+                edges + [sorted_wins[i]]
             )
         except Warning as e:
-            print(e)
+            # print(e)
             pass
         finally:
             i += 1

@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
-from votingutils import pairwise_comparison, pairwise_margins, weighted_pairwise_comparison, generate_random_approval_votes, generate_random_approval_disapproval_votes, generate_random_partition_votes
-from ranked_pairs import topological_sort
+from algorithms.votingutils import pairwise_comparison, pairwise_margins, weighted_pairwise_comparison, generate_random_approval_votes, generate_random_approval_disapproval_votes, generate_random_partition_votes
+from algorithms.ranked_pairs import topological_sort
 import time
 
 def get_connected_components(alternatives, pairs):
@@ -87,7 +87,7 @@ def recursive_update(v, can_reach:dict, searched:set):
     return can_reach[v]
 
 def ranked_partitions(alternatives:list, votes:list[list]):
-    start = time.perf_counter()
+    # start = time.perf_counter()
     pairs = pairwise_comparison(alternatives, votes)
     # print(pairs)
     
@@ -99,13 +99,13 @@ def ranked_partitions(alternatives:list, votes:list[list]):
     vertices = {} # vertex:root
     edges = set() # (root1, root2)
     
-    end = time.perf_counter()
-    print(f"Initialization: {end - start:.6f} s")
+    # end = time.perf_counter()
+    # print(f"Initialization: {end - start:.6f} s")
     
     for s in sorted(grouped_pairs.keys(), reverse=True):
-        print(f"{s}: {len(set(vertices.values()))} roots,    {len(edges)} edges,    {len(grouped_pairs[s])} new edges")
+        # print(f"{s}: {len(set(vertices.values()))} roots,    {len(edges)} edges,    {len(grouped_pairs[s])} new edges")
         
-        start_ = time.perf_counter()
+        # start_ = time.perf_counter()
         
         # Determine and store graph connections for easy access
         can_reach = {v:set() for v in vertices.values()}
@@ -128,21 +128,21 @@ def ranked_partitions(alternatives:list, votes:list[list]):
                 vertices[v] = v
             edges.add((vertices[u],vertices[v]))
         
-        end = time.perf_counter()
-        print(f"    Edge addition: {end - start_:.6f} s")
+        # end = time.perf_counter()
+        # print(f"    Edge addition: {end - start_:.6f} s")
         # print(f"        {topo_num} Topological Sorts: {topo_time:.6f} s")
         
-        start_ = time.perf_counter()
+        # start_ = time.perf_counter()
         
         # Collect unbreakable connected components (those with multiple edges of the same strength)
         # print(edges)
         components = get_connected_components(vertices.values(), edges)
         # print(components)
         
-        end = time.perf_counter()
-        print(f"    Connected components: {end - start_:.6f} s")
+        # end = time.perf_counter()
+        # print(f"    Connected components: {end - start_:.6f} s")
         
-        start_ = time.perf_counter()
+        # start_ = time.perf_counter()
         
         # update pointers to roots
         for root in components.keys():
@@ -159,9 +159,9 @@ def ranked_partitions(alternatives:list, votes:list[list]):
                 temp.add((vertices[u], vertices[v]))
         edges = temp
         
-        end = time.perf_counter()
-        print(f"    Root/Edge updates: {end - start_:.6f} s")
-        print()
+        # end = time.perf_counter()
+        # print(f"    Root/Edge updates: {end - start_:.6f} s")
+        # print()
         
         # print(vertices)
         # print(edges)
@@ -171,14 +171,22 @@ def ranked_partitions(alternatives:list, votes:list[list]):
     sorted_roots, _ = topological_sort(set(vertices.values()), edges)
     # print(sorted_roots)
     output = [set(v for v in vertices if vertices[v] == root) for root in sorted_roots]
-    end = time.perf_counter()
-    print(f"Total Time: {end-start} s")
+    # end = time.perf_counter()
+    # print(f"Total Time: {end-start} s")
     return output
 
 def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
-    pairs = pairwise_comparison(alternatives, votes)
-    for a,b in pairs.keys():
-        pairs[(a,b)] += (pairs[(a,b)]-pairs[(b,a)])
+    pairs_ = pairwise_comparison(alternatives, votes)
+    # pairs = pairs_.copy()
+    
+    pairs = {}
+    num_votes = len(votes)
+    for a,b in pairs_.keys():
+        pairs[(a,b)] = (pairs_[(a,b)]-pairs_[(b,a)])/(num_votes-(pairs_[(a,b)]+pairs_[(b,a)])+1)
+    
+    # smith_set = set(a for a in alternatives if all(pairs[(a,b)] >= 0 for b in alternatives if b != a))
+    # print(f"Smith Set: {smith_set}")
+    
     # Group pairs based on beat strength
     grouped_pairs = {} # strength:[edges]
     for tup,val in pairs.items():
@@ -190,7 +198,7 @@ def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[
     for s in sorted(grouped_pairs.keys(), reverse=True):
         if s < 0:
             continue
-        print(f"{s}: {len(set(vertices.values()))} roots,    {len(edges)} edges,    {len(grouped_pairs[s])} new edges")
+        # print(f"{s}: {len(set(vertices.values()))} roots,    {len(edges)} edges,    {len(grouped_pairs[s])} new edges")
         
         # Determine and store graph connections for easy access
         can_reach = {v:set() for v in vertices.values()}
@@ -201,6 +209,18 @@ def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[
         for a in can_reach.keys():
             recursive_update(a, can_reach, searched)
         
+        # phase1 = can_reach.copy()
+        
+        # searched = set()
+        # for a in can_reach.keys():
+        #     recursive_update(a, can_reach, searched)
+        
+        # for a in can_reach.keys():
+        #     if can_reach[a].difference(phase1[a]):
+        #         print(f"Error: {a} can reach {can_reach[a]} but only {phase1[a]} in phase 1")
+        #         print(f"Votes: {votes}")
+        #         print()
+                
         # Check if each pairwise win of strength s creates a cycle with stronger pairs 
         old_vertices = set(v for v in vertices.keys())
         for edge in grouped_pairs[s]:
@@ -406,160 +426,27 @@ def process_partition(partition:list[set], targets:list[int]) -> tuple[list[set]
             
 #     return optimized, optimized_tags, split_indices
 
-# alternatives = list(range(500))
-# votes = generate_random_partition_votes(alternatives, 50, [0.1])
-# for i, vote in enumerate(votes):
-#     print(f"Vote {i}: {[len(group) for group in vote]} {">:(" if len(vote) > 2 and len(vote[len(vote)-1]) > 1.25*len(vote[0]) else ""}")
-# cycles = generate_pairwise_partition(alternatives, votes)
-# for j, cycle in enumerate(cycles):
-#         print(f"G{j}: {len(cycle)}")
-# exit()
-# votes = generate_random_approval_disapproval_votes(alternatives, 5, approval_prob=0.1, disapproval_prob=0.01)
-# pd.DataFrame(votes).to_csv("./data/approval_disapproval_votes.csv", index=False)
-# alternatives = list(str(i) for i in range(200))
-# print(pd.read_csv("./data/approval_disapproval_votes.csv").values.tolist())
-# votes = [[set() if group=='set()' else set(group.strip('{}').split(', ')) for group in vote] for vote in pd.read_csv("./data/approval_disapproval_votes.csv").values.tolist()]
-
-A = 500
-V= 50
-alternatives = list(range(A))
-# votes = generate_random_partition_votes(alternatives, V, [10/A, 1-10/A-2/A], [0])
-# votes = generate_random_partition_votes(alternatives, V, [0.01,0.02,0.05,0.915], [0])
-# votes = generate_random_partition_votes(alternatives, V, [1/A]*A, [0])
-votes = generate_random_partition_votes(alternatives, V, [20/A], [10/A])
-target = [50,10]
-
-# votes = [[set([0]), set([1]), set([2])], [set([2]), set([0]), set([1])], [set([1]), set([2]), set([0])]]
-
-score = {a:0 for a in alternatives}
-for vote in votes:
-    scores = [1/i for i in range(1,len(vote))] + [0]
-    index = 0
-    for group in vote:
-        for a in group:
-            score[a] += scores[index]
-        index += 1
-
-# cycles = pairwise_partition(alternatives, votes)
-pairs = pairwise_comparison(alternatives, votes)
-wins = {(u,v):pairs[(u,v)] for u,v in pairs.keys() if pairs[(u,v)] > pairs[(v,u)]}
-# cycles = ranked_partitions(alternatives, votes)
-
-cycles = ranked_partitions(alternatives, votes)
-cyclesm = ranked_paritions_with_margins(alternatives, votes)
-
-# print(sorted(wins.values(),reverse=True))
-print("Simple Condorcet:")
-for cycle in pairwise_partition(alternatives, votes):
-    print(f"--------------------\n{min(score[a] for a in cycle):.6f} : {cycle}")
-print()
-
-# print()
-# print("Weighted Condorcet: ")
-# for cycle in weighted_pairwise_partition(alternatives, votes):
-#     print(f"{min(score[a] for a in cycle)} : {cycle}")
-
-print("Ranked Partitions: ")
-for cycle in cycles:
-    print(f"--------------------\n{min(score[a] for a in cycle):.3f}, {len(cycle)} : {cycle}")
-print()
-
-
-print("Ranked Partitions w/ Margins: ")
-for cycle in cyclesm:
-    print(f"--------------------\n{min(score[a] for a in cycle):.3f}, {len(cycle)} : {cycle}")
-print()   
-# exit()
-
-cycles = cyclesm
-# for cycle in cycles:
-#     print(cycle)
-# print()
-num_rounds = 1
-vote_changes = [A-max(len(vote[i]) for i in range(len(vote))) for vote in votes]
-
-while (num_rounds < 20):
-    cycles, splits = process_partition(cycles, target)
-    
-    print(f"After round {num_rounds}:")
-    print(f"{vote_changes} vote changes")
-    for cycle in cycles:
-        print(f"--------------------\n : {cycle}")
-    print(splits)
-    print()
-    
-    if len(splits) == 0:
-        break
-    splits.reverse()
-    vote_changes = [0]*V   
-    for index in splits:
-        alternatives = set(cycles[index])
-        n = len(alternatives)
-        # print(alternatives)
-        # votes_ = generate_random_partition_votes(alternatives, V, [min(5/len(alternatives),0.4),min(20/len(alternatives),0.4)], [min(5/len(alternatives),0.4),min(20/len(alternatives),0.4)])
+if __name__ == "__main__":
+    # for _ in range(20):
+        # alts = list(range(20))
         
-        # Update preference profiles
-        weights = {a:np.random.rand()*(score[a]/max(score[b] for b in alternatives)) for a in alternatives}
-        for i in range(len(votes)):
-            remaining = alternatives.copy()
-            for group in votes[i]:
-                group.difference_update(alternatives.difference(remaining))
-                rem_r = np.random.rand()
-                add_r = np.random.rand()
-                for v in remaining:
-                    if weights[v] < 0.01*rem_r:
-                        group.discard(v)
-                        vote_changes[i] += 1
-                    elif weights[v] < 0.1*add_r:
-                        group.add(v)
-                        vote_changes[i] += 1
-                remaining.difference_update(group)
-                # print(remaining)
-                # vote.append(group)
-            if remaining:
-                votes[i].append(remaining)
-
-        votes_ = [[group.intersection(alternatives) for group in vote] for vote in votes]
-        
-        split_cycle = ranked_partitions(list(alternatives), votes_)
-        cycles.pop(index)
-        for cycle in reversed(split_cycle):
-            cycles.insert(index, cycle)
-        num_rounds += 1
-        
-# for cycle in cycles:
-#     print(f"--------------------\n{min(score[a] for a in cycle):.6f} : {cycle}")
-# print()
-
-exit()
-
-trials = pd.DataFrame(columns=["Trial", "Alternatives", "Votes", "Cycles"])
-strata = []
-
-for i in range(20):
-    A = np.random.randint(100,501)
-    V = np.random.randint(5,21)
+    # from algorithms.votingutils import generate_random_votes
+    # votes = generate_random_votes(alts, 10)
+    # print(votes)
     
-    alternatives = list(range(A))
-    votes = generate_random_partition_votes(alternatives, V, [1/A]*A)
-    
-    # votes = generate_random_partition_votes(alternatives, V, [0.05])
-    # cycles = weighted_pairwise_partition(alternatives, votes)
-    cycles = pairwise_partition_no_ties(alternatives, votes)
-    
-    trials.loc[i] = {"Trial": i+1, "Alternatives": len(alternatives), "Votes": len(votes), "Cycles": []}
-    strata.append([len(cycle) for cycle in cycles])
-    print(f"Trial {i+1}: {len(alternatives)}:{len(votes)} alternatives to votes")
-    # print([vote[0] for vote in votes if len(vote)>1])
-    # print(f"Approvals: {sum(len(vote[0]) for vote in votes)}")
-    # print(f"Unique Approvals: {len(set().union(*[vote[0] for vote in votes]))}")
-    for j, cycle in enumerate(cycles):
-        trials.loc[i, "Cycles"].append(len(cycle))
-        print(f"R{j}: {len(cycle)}")
-    print()
-
-max_row = max(len(row) for row in strata)
-trial_strata = pd.DataFrame([row + [0]*(max_row - len(row)) for row in strata]).T
-trial_strata['mean'] = trial_strata.replace(0,np.nan).mean(axis=1)
-# trials.to_csv("./data/partitions/weighted_trials.csv", index=False)
-# trial_strata.to_csv("./data/partitions/weighted_strata.csv", index=False)
+    partition = ranked_partitions_with_margins(
+        ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+        [
+            ['1', '4', '2', '7', '0', '6', '5', '8', '3', '9'],
+            ['4', '7', '9', '5', '6', '1', '3', '0', '8', '2'],
+            ['6', '4', '3', '2', '5', '8', '7', '0', '9', '1'],
+            ['2', '3', '6', '1', '4', '8', '5', '9', '0', '7'],
+            ['1', '7', '0', '2', '9', '8', '4', '6', '3', '5'],
+            ['5', '1', '2', '3', '8', '9', '7', '6', '0', '4'],
+            ['1', '6', '3', '9', '0', '4', '8', '7', '2', '5'],
+            ['1', '4', '8', '7', '6', '2', '3', '9', '5', '0'],
+            ['5', '6', '0', '3', '9', '4', '1', '2', '8', '7'],
+            ['4', '0', '9', '3', '7', '2', '5', '6', '1', '8']
+        ]
+    )
+    print(partition)

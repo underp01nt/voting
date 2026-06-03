@@ -1,5 +1,5 @@
 from collections import Counter
-from partitions import ranked_partitions_with_margins, process_partition
+from algorithms.partitions import ranked_partitions_with_margins, process_partition
 from services.crypto import aesgcm, aes_encrypt, aes_decrypt
 from services.viz import build_rank_table, build_heat_map
 from services.utils import generate_id

@@ -2,59 +2,33 @@ import argparse, requests
 
 ELECTIONS_MGMT_URL = "http://127.0.0.1:8000/elections"
 
-# -make  |  identity = hashed_signature
-def create_election(identity: str, target_size: int): 
-    try:
-        payload = {"name": identity, "target_size": target_size}
-        response = requests.post(f"{ELECTIONS_MGMT_URL}/new", json=payload)
-        # print(response.status_code); print(response.text)
-        response.raise_for_status()
+def post(path: str, payload: dict) -> dict[str, str]:
+    print("POST URL:", path)
+    print("POST DATA:", payload)
+    print()
 
-        data = response.json()
-        print(f"Created election ID: {data['id']}")
-        print(data["message"])
-    
-    except requests.RequestException as e:
-        print(e)
+    complete_path = ELECTIONS_MGMT_URL + path
+    response = requests.post(complete_path, json=payload, timeout=5)
+    response.raise_for_status()
+    return response.json()
 
-# -candidate  |  identity = name
-def add_new_candidate(identity: str): 
-    try:
-        payload = {"name": identity}
-        response = requests.post(f"{ELECTIONS_MGMT_URL}/add-candidate", json=payload)
-        response.raise_for_status()
+# -make  
+def create_election(name: str, target_size: int): 
+    return post("/new", {"name": name, "target_size": target_size})
 
-        data = response.json()
-        print(f"Created candidate ID: {data["id"]}")
-        print(data["message"])
+# -candidate  |  REQUIRES: name (of candidate)
+def add_new_candidate(name: str): 
+    return post("/add-candidate", {"name": name})
 
-    except requests.RequestException as e:
-        print(e)
+# -register  
+def register_voter(hashed_signature: str, election_id: str):
+    return post("/register-voter", {"hashed_signature": hashed_signature, "election_id": election_id})
 
-# -register  |  identity = hashed_signature
-def register_voter(identity: str, election_name: str, election_id: str):
-    try:
-        payload = {"hashed_signature": identity, "election_name": election_name, "election_id": election_id}
-        response = requests.post(f"{ELECTIONS_MGMT_URL}/register-voter", json=payload)
-        response.raise_for_status()
+# -nominate  
+def nominate_candidate(candidate_id: str, election_id: str):
+    return post("/nominate", {"candidate_id": candidate_id, "election_id": election_id})
 
-        data = response.json()
-        print(f"Successfully registered voter with ballot ID: {data["ballot_id"]}")
-        
-    except requests.RequestException as e:
-        print(e)
-
-# -nominate  |  identity = candidate_id
-def nominate_candidate(identity: str, election_id: str):
-    try:
-        payload = {"candidate_id": identity, "election_id": election_id}
-        response = requests.post(f"{ELECTIONS_MGMT_URL}/nominate", json=payload)
-        response.raise_for_status()
-
-        data = response.json()
-        print(data["message"])
-
-    except requests.RequestException as e: print(e)
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -71,7 +45,6 @@ if __name__ == "__main__":
 
     # params
     parser.add_argument("--target-size", type=int)
-    parser.add_argument("--election", type=str)
     parser.add_argument("--election-id", type=str)
     parser.add_argument("--candidate-id", type=str)
 
@@ -79,5 +52,5 @@ if __name__ == "__main__":
 
     if args.make: create_election(args.identity, args.target_size)
     elif args.candidate: add_new_candidate(args.identity)
-    elif args.register: register_voter(args.identity, args.election, args.election_id)
+    elif args.register: register_voter(args.identity, args.election_id)
     elif args.nominate: nominate_candidate(args.identity, args.election_id)

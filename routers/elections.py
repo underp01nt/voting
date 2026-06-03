@@ -76,8 +76,11 @@ def register_voter_route(payload: Voter, db=Depends(get_votes_db)):
 @router.post("/nominate")
 def nominate_candidate_route(payload: Nominee, db=Depends(get_votes_db)):
     try: 
-        nominate_candidate(db, candidate_id=payload.candidate_id, election_id=payload.election_id)
-        return {"message": f"Nominated candidate {payload.candidate_id} for election {payload.election_id}"}
+        nomination = nominate_candidate(db, candidate_id=payload.candidate_id, election_id=payload.election_id)
+        return {
+            "message": f"Nominated candidate {payload.candidate_id} for election {payload.election_id}",
+            **nomination,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 

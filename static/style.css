@@ -1049,3 +1049,51 @@ body {
     font-size: 0.82rem;
     cursor: pointer;
 }
+
+.analysis-card {
+    max-width: 1200px;
+}
+
+.analysis-section {
+    margin-top: 24px;
+}
+
+.analysis-section h2 {
+    margin-bottom: 12px;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+}
+
+.chart-container .plotly-graph-div {
+    margin: 0 auto;
+}
+.analysis-grid {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    margin-top: 20px;
+    margin-bottom: 24px;
+
+}
+
+.analysis-panel {
+    flex: 1;
+    min-width: 0;
+}
+
+.chart-container {
+    background: white;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+}

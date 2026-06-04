@@ -14,19 +14,16 @@ def parse_csv(data: bytes) -> list[list[str]]:
     return [row for row in reader if row]
 
 # count all votes using ranked_pairs, returns results dict for template context
-def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
+def count_votes(candidates: list[str], ballots: list[list[set[str]]], target, candidate_map=None) -> dict:
     results = {}
     
     start = time.time()
     ranked_partitions_result = ranked_partitions_with_margins(candidates, ballots)
-    
-    target = None #NEED TARGET
 
     processed_partition, split_indices = process_partition(ranked_partitions_result, target)
     end = time.time()
-    
     fig = build_rank_table(processed_partition)
-    heat = build_heat_map(candidates, ballots)
+    heat = build_heat_map(candidates, ballots, candidate_map=candidate_map)
 
     results["Partition"] = {
         "duration": end - start,
@@ -39,6 +36,19 @@ def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
     }
 
     return results
+
+def get_target_sizes(election_id: str, db) -> list[int]:
+    cursor = db.cursor()
+
+    cursor.execute(
+        """
+            SELECT target_sizes
+            FROM elections
+            WHERE id = %s
+        """,
+        (election_id,)
+    )
+    return cursor.fetchone()[0]
 
 def insert_or_get_voter(db, hashed_signature: str):
     cursor = db.cursor()
@@ -330,6 +340,9 @@ def get_unencrypted_ballots_for_current_round(election_id: str, db) -> list[list
         return unencrypted
     
     except Exception: raise
+
+def normalize_ballots(ballots) -> list[list[set[str]]]:
+    return [[set(tier) for tier in ballot] for ballot in ballots]
 
 # get the name and round number of this election
 def get_election_details(election_id: str, db):

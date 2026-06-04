@@ -12,6 +12,7 @@ from services.processing import (
     get_standings,
     has_submitted_ballot,
     get_unencrypted_ballots_for_current_round,
+    normalize_ballots,
 )
 from typing import Optional
 
@@ -134,9 +135,30 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
 #         context={"standings": get_standings(election_id, round, db), "election_id": election_id, "round": round} 
 #     )
     
+
+from services.processing import count_votes, get_candidates, get_target_sizes
+
+# -> list[list[list[str]]]
 @router.get("/{election_id}/ballots")   # gets list of a collection of tiers defined by voters
-def get_ballots(request: Request, election_id: str, db=Depends(get_votes_db)) -> list[list[list[str]]]:
+def get_ballots(request: Request, election_id: str, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
     elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
-    return get_unencrypted_ballots_for_current_round(election_id, db)
+    
+    candidate_map = get_candidates(election_id, db)
+    results = count_votes(
+        candidates=[candidate["candidate_id"] for candidate in candidate_map], 
+        ballots=normalize_ballots(get_unencrypted_ballots_for_current_round(election_id, db)),
+        target=get_target_sizes(election_id, db),
+        candidate_map=candidate_map,
+    )
+
+    return templates.TemplateResponse(
+        request=request, 
+        name="blank.html", 
+        context={
+            "duration": results["Partition"]["duration"], 
+            "fig": results["Partition"]["fig"],
+            "heat": results["Partition"]["heat"],
+        } 
+    )

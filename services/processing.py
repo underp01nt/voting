@@ -243,7 +243,7 @@ def get_existing_ballot(hashed_signature, election_id, db):
     )
     return cursor.fetchone()
 
-def submit_ballot(hashed_signature: str, election_id: str, candidate_ids: list[str], round_number: int, db):
+def submit_ballot(hashed_signature: str, election_id: str, tiers: list[list[str]], round_number: int, db):
     try:
         cursor = db.cursor()
         cursor.execute(
@@ -251,8 +251,9 @@ def submit_ballot(hashed_signature: str, election_id: str, candidate_ids: list[s
                 UPDATE ballots
                 SET encrypted_ballot = %s, last_updated = NOW(), round = %s
                 WHERE hashed_signature = %s AND election_id = %s
+                RETURNING id
             """,
-            (aes_encrypt(aesgcm, json.dumps(candidate_ids)), round_number, hashed_signature, election_id)
+            (aes_encrypt(aesgcm, json.dumps(tiers)), round_number, hashed_signature, election_id)
         ); db.commit()
     
     except Exception:
@@ -310,4 +311,12 @@ def get_standings(election_id: str, round_number: int, db) -> list[dict]:
                 return standings
 
             case _: raise Exception("Round not yet implemented")  # TODO: work on multiple round
+    except Exception: raise
+
+# get the name and round number of this election
+def get_election_details(election_id: str, db):
+    try:
+        cursor = db.cursor()
+        cursor.execute("SELECT name, round FROM elections WHERE id = %s", (election_id,))
+        return cursor.fetchone()
     except Exception: raise

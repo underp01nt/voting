@@ -7,9 +7,8 @@
         <script src="/static/js/tiers.js" defer></script>
         <script>
             const candidates = {{ all_candidates|tojson }};
-            const electionId = "{[ election_id | json }}";
+            const electionId = "{{ election_id }}";
         </script>
-
         
         <title>Tiered Ballot</title>
     </head>

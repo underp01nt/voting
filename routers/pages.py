@@ -4,7 +4,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from services.crypto import aesgcm, aes_decrypt
-from services.processing import get_elections, get_candidates, get_existing_ballot
+from services.processing import get_elections, get_candidates, get_existing_ballot, get_election_details
 from typing import Optional
 import ast
 
@@ -67,57 +67,57 @@ def dashboard(request: Request, db=Depends(get_votes_db)):
         )
     else: return RedirectResponse("/", status_code=303)
 
-@router.get("/cast")            # id in this context is election_id
-def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
-    hashed_signature = request.session.get("hashed_signature")
-    if not hashed_signature: raise HTTPException(401, "Not authenticated")
-
-    # existing ballot w/o encrypted_ballot => voter is registered for this election but no submission
-    ballot = get_existing_ballot(hashed_signature, id, db)
-    if not ballot: raise HTTPException(403, "Not registered for this election")
-
-    election_name, _, encrypted_ballot, last_updated, round_number = ballot
-    all_candidates = get_candidates(id, db)
-
-    # aes_decrypt returns string, so eval that
-    chosen_candidates = ast.literal_eval(aes_decrypt(aesgcm, encrypted_ballot)) if encrypted_ballot else []
-
-    if chosen_candidates:  # if not empty, use current list to get list of name and id mappings 
-        candidate_lookup = {candidate["candidate_id"]: candidate for candidate in all_candidates}
-        sol_chosen_candidates: list[dict[str, str]] = []
-
-        for chosen_candidate_id in chosen_candidates:
-            candidate = candidate_lookup[chosen_candidate_id]
-            sol_chosen_candidates.append({"name": candidate["name"], "candidate_id": chosen_candidate_id})
-
-        chosen_candidates = sol_chosen_candidates
-
-    return templates.TemplateResponse(
-            request=request, 
-            name="cast.html",
-            context={
-                "all_candidates": all_candidates,
-                "chosen_candidates": chosen_candidates,  
-                "election_id": id,
-                "last_updated": last_updated or None,
-                "election_name": election_name, 
-                "round_number": round_number,
-            }
-        )
+# @router.get("/cast")            # id in this context is election_id
+# def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
+#     hashed_signature = request.session.get("hashed_signature")
+#     if not hashed_signature: raise HTTPException(401, "Not authenticated")
+# 
+#     # existing ballot w/o encrypted_ballot => voter is registered for this election but no submission
+#     ballot = get_existing_ballot(hashed_signature, id, db)
+#     if not ballot: raise HTTPException(403, "Not registered for this election")
+# 
+#     election_name, _, encrypted_ballot, last_updated, round_number = ballot
+#     all_candidates = get_candidates(id, db)
+# 
+#     # aes_decrypt returns string, so eval that
+#     chosen_candidates = ast.literal_eval(aes_decrypt(aesgcm, encrypted_ballot)) if encrypted_ballot else []
+# 
+#     if chosen_candidates:  # if not empty, use current list to get list of name and id mappings 
+#         candidate_lookup = {candidate["candidate_id"]: candidate for candidate in all_candidates}
+#         sol_chosen_candidates: list[dict[str, str]] = []
+# 
+#         for chosen_candidate_id in chosen_candidates:
+#             candidate = candidate_lookup[chosen_candidate_id]
+#             sol_chosen_candidates.append({"name": candidate["name"], "candidate_id": chosen_candidate_id})
+# 
+#         chosen_candidates = sol_chosen_candidates
+# 
+#     return templates.TemplateResponse(
+#             request=request, 
+#             name="cast.html",
+#             context={
+#                 "all_candidates": all_candidates,
+#                 "chosen_candidates": chosen_candidates,  
+#                 "election_id": id,
+#                 "last_updated": last_updated or None,
+#                 "election_name": election_name, 
+#                 "round_number": round_number,
+#             }
+#         )
 
 @router.get("/cast-tiers")            # id in this context is election_id
 def cast_tiers(request: Request, id: str, db=Depends(get_votes_db)):
+    name, current_round = get_election_details(id, db)
     return templates.TemplateResponse(
             request=request, 
             name="tiers.html",
             context={
                 "all_candidates": get_candidates(id, db),
                 "election_id": id,
-                # "election_name": election_name, 
-                # "round_number": round_number,
+                "election_name": name, 
+                "round_number": current_round,
             }
         )
-
 
 ####################  TEST ROUTES  #######################
 
@@ -126,12 +126,5 @@ def get_token(request: Request):
     return templates.TemplateResponse(
         request=request, 
         name="token.html",
-    )
-
-@router.get("/test-tiers", response_class=HTMLResponse)
-def get_token(request: Request):
-    return templates.TemplateResponse(
-        request=request, 
-        name="tiers.html",
     )
 

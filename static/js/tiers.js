@@ -6,7 +6,7 @@ let activeTierId = null;
 addTier();
 
 async function submitBallot(payload) {
-    const response = await fetch(`/elections/${electionId}/tiers`, {
+    const response = await fetch(`/elections/${electionId}/ballot`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -18,8 +18,14 @@ async function submitBallot(payload) {
     return data;
 }
 
-const submitBtn = document.getElementById("submitListBtn");
+// close search boxes if outside click is detected
+document.addEventListener("click", (event) => {
+    const searchContainer = event.target.closest(".tier-search-container");
 
+    if (!searchContainer) { activeTierId = null; render(); }
+});
+
+const submitBtn = document.getElementById("submitListBtn");
 submitBtn.addEventListener("click", () => {
     const emptyTiers = tiers
         .map((t, i) => ({index: i + 1, empty: t.candidates.length === 0}))
@@ -45,7 +51,7 @@ submitBtn.addEventListener("click", () => {
     (async () => {
         try {
             const data = await submitBallot(payload);
-            // window.location.href = "/";
+            window.location.href = "/";
         }
         catch (err) {
             alert("Failed to submit ballot.");
@@ -130,7 +136,10 @@ function render() {
                 </button>
             </div>
 
-            <div style="margin-top:12px; position:relative;">
+            <div
+                class="tier-search-container"
+                style="margin-top:12px; position:relative;"
+            >
 
                 <input
                     id="search-${tier.id}"

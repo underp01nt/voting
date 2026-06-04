@@ -88,34 +88,38 @@ def nominate_candidate_route(payload: Nominee, db=Depends(get_votes_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
+# @router.post("/{election_id}/ballot")
+# def submit_or_update_ballot_route(request: Request, 
+#                                   payload: Ballot,
+#                                   election_id: str,
+#                                   db=Depends(get_votes_db)
+#                                   ):
+#     try:
+#         hashed_signature = request.session.get("hashed_signature", None)
+#         if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
+#             raise HTTPException(status_code=403, detail="Not authorized for this election")
+# 
+#         submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
+#         request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
+# 
+#         return {"msg": "Ballot submission successful"}
+# 
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e)) from e
+
 @router.post("/{election_id}/ballot")
-def submit_or_update_ballot_route(request: Request, 
-                                  payload: Ballot,
-                                  election_id: str,
-                                  db=Depends(get_votes_db)
-                                  ):
-    try:
-        hashed_signature = request.session.get("hashed_signature", None)
-        if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
-            raise HTTPException(status_code=403, detail="Not authorized for this election")
-
-        submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
-        request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
-
-        return {"msg": "Ballot submission successful"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e)) from e
-
-@router.post("/{election_id}/tiers")
 def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Depends(get_votes_db)):
     try:
         hashed_signature = request.session.get("hashed_signature", None)
         if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
             raise HTTPException(status_code=403, detail="Not authorized for this election")
+
+        ballot_id = submit_ballot(hashed_signature, election_id, payload.tiers, payload.round_number, db)
+        request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
         
-        submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
-    except: pass
+        return {"msg": "Ballot submission successful"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) from e
     
 @router.get("/{election_id}/standings")
 def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):

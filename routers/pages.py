@@ -105,6 +105,20 @@ def cast_ballot(request: Request, id: str, db=Depends(get_votes_db)):
             }
         )
 
+@router.get("/cast-tiers")            # id in this context is election_id
+def cast_tiers(request: Request, id: str, db=Depends(get_votes_db)):
+    return templates.TemplateResponse(
+            request=request, 
+            name="tiers.html",
+            context={
+                "all_candidates": get_candidates(id, db),
+                "election_id": id,
+                # "election_name": election_name, 
+                # "round_number": round_number,
+            }
+        )
+
+
 ####################  TEST ROUTES  #######################
 
 @router.get("/test-token", response_class=HTMLResponse)

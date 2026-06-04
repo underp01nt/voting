@@ -1,9 +1,4 @@
-let candidates = [  // define this
-    { id: 1, name: "Alice" },
-    { id: 2, name: "Bob" },
-    { id: 3, name: "Charlie" },
-    { id: 4, name: "Dana" }
-];
+console.log(JSON.stringify(candidates, null, 2))
 
 let tiers = [];
 let activeTierId = null;
@@ -110,12 +105,12 @@ function render() {
                 ${tier.candidates.length === 0
                     ? `<div style="color:#666;">No candidates in this tier</div>`
                     : tier.candidates.map(id => {
-                        const c = candidates.find(x => x.id === id);
+                        const c = candidates.find(x => x.candidate_id === id);
                         return `
                             <div class="ballot-item">
                                 <span>${c.name}</span>
                                 <button class="remove-btn"
-                                        onclick="removeCandidate('${tier.id}', ${id})">
+                                        onclick="removeCandidate('${tier.id}', '${id}')">
                                     ×
                                 </button>
                             </div>
@@ -148,7 +143,7 @@ function updateDropdown(tierId) {
 
     dropdown.innerHTML = results.map(c => `
         <div class="dropdown-item"
-             onclick="addCandidateToTier('${tier.id}', ${c.id})"
+             onclick="addCandidateToTier('${tier.id}', '${c.candidate_id}')"
              style="padding:8px; cursor:pointer;">
             ${c.name}
         </div>
@@ -183,10 +178,10 @@ function getAvailableCandidates(tierId, query) {
     return candidates.filter(c => {
         const matchesSearch = c.name.toLowerCase().includes(q);
 
-        const notInThisTier = !tier.candidates.includes(c.id);
+        const notInThisTier = !tier.candidates.includes(c.candidate_id);
 
         const notUsedElsewhere = !tiers.some(t =>
-            t.id !== tierId && t.candidates.includes(c.id)
+            t.id !== tierId && t.candidates.includes(c.candidate_id)
         );
 
         return matchesSearch && notInThisTier && notUsedElsewhere;

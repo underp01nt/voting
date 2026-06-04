@@ -43,7 +43,7 @@
                 </div>
                 <!-- TODO: implement election-aware cast and standings route-->
                 <div class="election-actions">
-                    <a href="/cast?id={{ election.id }}" class="btn-cast">Go to ballot →</a>
+                    <a href="/cast-tiers?id={{ election.id }}" class="btn-cast">Go to ballot →</a>
                     {% if election.last_updated %}
                         <a href="/elections/{{ election.id }}/standings?round={{ election.round}}"
                         class="btn-standings">

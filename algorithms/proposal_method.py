@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from rankings import generate_random_votes
+from algorithms.votingutils import generate_random_votes
+from Drawing import beat_graph, draw_beat_graph
 
 # candidates: array of strings; list of candidate names
 # preference_profiles: array of arrays of strings; list of voters' preferences,
@@ -53,6 +54,7 @@ def honest_election(candidates, preference_profiles):
 
 def plot_elections(elections: pd.DataFrame, title:str='Votes per Round'):
     plot = elections.plot(kind='bar')
+    plt.locator_params(axis='y', integer=True)
     plt.title(title)
     plt.xlabel('Round')
     plt.ylabel('Votes')
@@ -79,7 +81,7 @@ if __name__ == "__main__":
     # rankings = generate_random_votes(15, candidates)
     
     candidates = ['A', 'B', 'C']
-    rankings = [['A', 'B','C']] * 24 + [['C', 'A', 'B']] * 14 + [['C', 'B', 'A']] * 12
+    rankings = [['A', 'B','C']] * 8 + [['C', 'A', 'B']] * 6 + [['C', 'B', 'A']] * 4
     
     ranking, elections = honest_election(candidates, rankings)
     
@@ -88,4 +90,7 @@ if __name__ == "__main__":
     # pd.DataFrame(rankings).to_csv('./data/rankings.csv', index=False)
     # elections.to_csv('./data/elections.csv')
     
+    draw_beat_graph(candidates, rankings)
+    # plt.show()
     plot_elections(elections, title='Not Condorcet')
+    

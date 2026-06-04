@@ -66,7 +66,7 @@ def ranked_pairs_ranked_partitions_equivalence(minA=1, maxA=20, minV=1, maxV=20,
             passed += 1
     print(f"{passed}/{NUM_TESTS} tests passed.")
 
-def partition_trials(A=500, V=25, target=[50,10]):
+def partition_trials(A=500, V=25, target=[50,10], verbose=False):
     alternatives = list(range(A))
     # votes = generate_random_partition_votes(alternatives, V, [10/A, 1-10/A-2/A], [0])
     # votes = generate_random_partition_votes(alternatives, V, [0.01,0.02,0.05,0.915], [0])
@@ -95,16 +95,18 @@ def partition_trials(A=500, V=25, target=[50,10]):
     # print()
     num_rounds = 1
     vote_changes = [A-max(len(vote[i]) for i in range(len(vote))) for vote in votes]
+    total_change = [0]*V
 
     while (num_rounds < 20):
         cycles, splits = process_partition(cycles, target)
         
-        print(f"After round {num_rounds}:")
-        print(f"{vote_changes} vote changes")
-        for cycle in cycles:
-            print(f"--------------------\n : {cycle}")
-        print(splits)
-        print()
+        if (verbose):
+            print(f"After round {num_rounds}:")
+            print(f"{vote_changes} vote changes")
+            for cycle in cycles:
+                print(f"--------------------\n : {cycle}")
+            print(splits)
+            print()
         
         if len(splits) == 0:
             break
@@ -117,7 +119,7 @@ def partition_trials(A=500, V=25, target=[50,10]):
             # votes_ = generate_random_partition_votes(alternatives, V, [min(5/len(alternatives),0.4),min(20/len(alternatives),0.4)], [min(5/len(alternatives),0.4),min(20/len(alternatives),0.4)])
             
             # Update preference profiles
-            weights = {a:np.random.rand()*(score[a]/max(score[b] for b in alternatives)) for a in alternatives}
+            weights = {a:np.random.rand()*(score[a]/(max(score[b] for b in alternatives)+1)) for a in alternatives}
             for i in range(len(votes)):
                 remaining = alternatives.copy()
                 for group in votes[i]:
@@ -139,12 +141,24 @@ def partition_trials(A=500, V=25, target=[50,10]):
 
             votes_ = [[group.intersection(alternatives) for group in vote] for vote in votes]
             
+            votes = votes_
+            
+            for vote in votes:
+                scores = [1/i for i in range(1,len(vote))] + [0]
+                index = 0
+                for group in vote:
+                    for a in group:
+                        score[a] += scores[index]
+                    index += 1
+            
             split_cycle = ranked_partitions(list(alternatives), votes_)
             cycles.pop(index)
             for cycle in reversed(split_cycle):
                 cycles.insert(index, cycle)
             num_rounds += 1
-            
+        for i in range(len(total_change)):
+            total_change[i] += vote_changes[i]
+    return num_rounds, total_change, cycles
     # for cycle in cycles:
     #     print(f"--------------------\n{min(score[a] for a in cycle):.6f} : {cycle}")
     # print()
@@ -211,8 +225,12 @@ def condorcet_rp_rparts_comparison(alternatives, votes):
     print()
 
 if __name__ == "__main__":
-    ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
-    
+    # ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
+    for _ in range(NUM_TESTS):
+        A = np.random.randint(5,11)
+        V = np.random.randint(5,30)
+        num_rounds,_,_ = partition_trials(A,V,[1]*A)
+        print(f"Alts: {A}, Voters: {V}: Rounds: {num_rounds}, Proposal Rounds: {A*(A)}")
     # print(ranked_partitions_with_margins(['A', 'B', 'C', 'D'], [['A,B', 'C,D'], ['A', 'B', 'C', 'D'], ['B,D', 'A', 'C'], ['B', 'A,D,C'], ['C', 'D', 'A', 'B']]))
     # ranked_pairs_ranked_partitions_equivalence()
     

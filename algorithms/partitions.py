@@ -190,7 +190,7 @@ def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[
     pairs = {}
     num_votes = len(votes)
     for a,b in pairs_.keys():
-        pairs[(a,b)] = (pairs_[(a,b)]-pairs_[(b,a)])/(num_votes-(pairs_[(a,b)]+pairs_[(b,a)])+1)
+        pairs[(a,b)] = (pairs_[(a,b)]-pairs_[(b,a)])/(2*num_votes-(pairs_[(a,b)]+pairs_[(b,a)]))
     
     # smith_set = set(a for a in alternatives if all(pairs[(a,b)] >= 0 for b in alternatives if b != a))
     # print(f"Smith Set: {smith_set}")

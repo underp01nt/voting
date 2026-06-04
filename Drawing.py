@@ -9,6 +9,13 @@ def beat_graph(candidates:list, votes:list):
     graph.add_weighted_edges_from([(a,b,pairs[(a,b)]) for a,b in pairs.keys()])
     return graph
 
+def draw_beat_graph(candidates:list, votes:list):
+    graph = beat_graph(candidates, votes)
+    pos = nx.arf_layout(graph)
+    color = ['C0','C1','C2','C3','C4','C5','C6','C7','C8','C9']*(len(candidates)//10 + 1)
+    nx.draw(graph, pos, arrowsize=50, node_color=color[:len(candidates)], node_size=1000, font_size=20, with_labels=True)
+    nx.draw_networkx_edge_labels(graph, pos, font_size=20, edge_labels=nx.get_edge_attributes(graph, 'weight'))
+
 def layered_beat_graph(candidates:list, votes:list):
     wins = pairwise_wins(candidates, votes)
     components = get_connected_components(candidates, wins)

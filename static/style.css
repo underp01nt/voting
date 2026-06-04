@@ -161,6 +161,7 @@ body {
     background-color: #005ea2;
     color: white;
     border: none;
+    cursor: pointer;
 }
 
 .btn-primary:hover {
@@ -977,4 +978,74 @@ body {
     font-family: "Georgia", "Times New Roman", serif;
     font-weight: 500;
     color: #1f2937;
+}
+
+.tier-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.tier-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tier-badge {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #0b5fff;
+    color: white;
+
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.tier-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.tier-remove-btn {
+    background: transparent;
+    border: 1px solid #dc2626;
+
+    color: #dc2626;
+
+    padding: 4px 10px;
+    border-radius: 999px;
+
+    font-size: 0.75rem;
+    cursor: pointer;
+
+    transition: all 0.15s ease;
+}
+
+.tier-remove-btn:hover {
+    background: #dc2626;
+    color: white;
+}
+
+.cart-section {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 0.82rem;
+    cursor: pointer;
 }

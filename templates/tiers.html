@@ -16,6 +16,9 @@
     <body>
         <div class="auth-container">
             <div class="auth-card ballot-card">
+                <div class="cast-meta">
+                    <div><strong>{{ election_name }} | Round {{ round_number }}</strong></div>
+                </div>
 
                 <h1>Create Ranked Tiers</h1>
                 <p class="subtitle">Add candidates to ranked tiers. The tier with the lowest number is higher preference.</p>
@@ -23,14 +26,14 @@
                 <hr class="gov-divider">
 
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <button class="btn btn-secondary" onclick="addTier()">+ Add a tier</button>
-                    <button class="btn btn-secondary" onclick="clearAllTiers()">Clear all tiers</button>
+                    <button class="btn btn-secondary btn-small" onclick="addTier()">+ Add a tier</button>
+                    <button class="btn btn-secondary btn-small" onclick="clearAllTiers()">Clear all tiers</button>
                 </div>
 
                 <div id="tiers-container"></div>
 
                 <div class="auth-footer" style="display:flex; justify-content:space-between; margin-top:20px;">
-                    <a href="/" class="back-link">← Go back</a>
+                    <a href="/" class="back-link" onclick="return confirm('Unsaved changes will be lost. Continue?')">← Go back</a>
 
                     <button class="btn btn-primary"
                             id="submitListBtn"

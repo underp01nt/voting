@@ -1,4 +1,4 @@
-console.log(JSON.stringify(candidates, null, 2))
+// console.log(JSON.stringify(candidates, null, 2))
 
 let tiers = [];
 let activeTierId = null;
@@ -27,6 +27,11 @@ document.addEventListener("click", (event) => {
 
 const submitBtn = document.getElementById("submitListBtn");
 submitBtn.addEventListener("click", () => {
+     if (tiers.length === 0) {
+        alert("You must create at least one tier before submitting.");
+        return;
+    }
+
     const emptyTiers = tiers
         .map((t, i) => ({index: i + 1, empty: t.candidates.length === 0}))
         .filter(t => t.empty);
@@ -71,12 +76,20 @@ function addTier() {
 }
 
 function removeTier(tierId) {
+    const confirmed = confirm(
+        "Remove this tier?\n\nAll candidates in this tier will be removed."
+    ); if (!confirmed) return;
+
     tiers = tiers.filter(t => t.id !== tierId);
     if (activeTierId === tierId) activeTierId = null;
     render();
 }
 
 function clearAllTiers() {
+    const confirmed = confirm(
+        "Clear all tiers?\n\nThis will remove every tier and candidate assignment."
+    ); if (!confirmed) return;
+
     tiers = [];
     activeTierId = null;
     render();
@@ -127,11 +140,16 @@ function render() {
     container.innerHTML = tiers.map((tier, index) => `
         <div class="cart-section" style="margin-bottom:16px;">
 
-            <div style="display:flex; justify-content:space-between;">
-                <strong>Tier ${index + 1}</strong>
+            <div class="tier-header">
+                <div class="tier-label">
+                    <span class="tier-badge">${index + 1}</span>
+                    <span class="tier-title">Tier ${index + 1}</span>
+                </div>
 
-                <button class="btn btn-secondary"
-                        onclick="removeTier('${tier.id}')">
+                <button
+                    class="tier-remove-btn"
+                    onclick="removeTier('${tier.id}')"
+                >
                     Remove
                 </button>
             </div>

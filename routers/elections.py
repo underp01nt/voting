@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory="templates")
 """ RELEVANT REQUEST SCHEMAS """
 class Election(BaseModel):
     name: str
-    target_size: int
+    target_size: list[int]
 
 class Candidate(BaseModel):
     name: str

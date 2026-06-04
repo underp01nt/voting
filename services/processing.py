@@ -19,15 +19,23 @@ def count_votes(candidates: list[str], ballots: list[list[str]]) -> dict:
     
     start = time.time()
     ranked_partitions_result = ranked_partitions_with_margins(candidates, ballots)
-    end = time.time()
+    
+    target = None #NEED TARGET
 
-    fig = build_rank_table(ranked_partitions_result)
+    processed_partition, split_indices = process_partition(ranked_partitions_result, target)
+    end = time.time()
+    
+    fig = build_rank_table(processed_partition)
     heat = build_heat_map(candidates, ballots)
 
-    results["Ranked Partitions"] = {
+    results["Partition"] = {
         "duration": end - start,
         "fig": fig.to_html(full_html=False, config={"responsive": True}),
         "heat": heat.to_html(full_html=False, config={"responsive": True})
+    }
+    
+    results["Next Round"] = {
+        "to_split": split_indices[0] if split_indices else None
     }
 
     return results

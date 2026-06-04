@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory="templates")
 """ RELEVANT REQUEST SCHEMAS """
 class Election(BaseModel):
     name: str
-    target_size: list[int]
+    target_sizes: list[int]
 
 class Candidate(BaseModel):
     name: str
@@ -43,7 +43,7 @@ def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
         election_id = create_new_election(
             db, 
             name=payload.name, 
-            target_size=payload.target_size, 
+            target_sizes=payload.target_sizes, 
         )
 
         return {"id": election_id, "message": "Election was successfully created"}

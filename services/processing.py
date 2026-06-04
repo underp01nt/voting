@@ -70,18 +70,18 @@ def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None, elect
     db.commit()
 
 # returns election ID if election is successfully created
-def create_new_election(db, name: str, target_size: int) -> str:
+def create_new_election(db, name: str, target_sizes: int) -> str:
     cursor = db.cursor()
 
     try:
         make_new_election_query = """
-            INSERT INTO elections (id, name, target_size, valid, round)
+            INSERT INTO elections (id, name, target_sizes, valid, round)
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id
         """
 
         valid=True; election_id=generate_id(5); round_number=1
-        data = (election_id, name, target_size, valid, round_number)
+        data = (election_id, name, target_sizes, valid, round_number)
 
         cursor.execute(make_new_election_query, data)
         result = cursor.fetchone()
@@ -267,6 +267,24 @@ def has_submitted_ballot(hashed_signature: str, election_id: str, db) -> bool:
     )
     return cursor.fetchone() is not None
 
+def count_standings(enecrypted_ballots: list[tuple[list, int]], db):
+    counts = Counter()
+    for (encrypted_ballot,) in encrypted_ballots:
+        candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
+        for candidate_id in candidate_ids:
+            counts[candidate_id] += 1
+
+    candidate_lookup = {c["candidate_id"]: c["name"] for c in get_candidates(election_id, db)}
+    standings = [{
+                   "name": candidate_lookup[candidate_id],
+                   "candidate_id": candidate_id,
+                   "num_approvals": num_approvals, 
+                } for candidate_id, num_approvals in counts.items()]
+
+    standings.sort(key=lambda x: x["num_approvals"], reverse=True)
+
+    return standings
+
 def get_standings(election_id: str, round_number: int, db) -> list[dict]:
     try:
         cursor = db.cursor()
@@ -284,22 +302,8 @@ def get_standings(election_id: str, round_number: int, db) -> list[dict]:
 
         match round_number:
             case 1: 
-                counts = Counter()
-                for (encrypted_ballot,) in encrypted_ballots:
-                    candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
-                    for candidate_id in candidate_ids:
-                        counts[candidate_id] += 1
-
-                candidate_lookup = {c["candidate_id"]: c["name"] for c in get_candidates(election_id, db)}
-                standings = [{
-                                "name": candidate_lookup[candidate_id],
-                                "candidate_id": candidate_id,
-                                "num_approvals": num_approvals, 
-                             }
-                            for candidate_id, num_approvals in counts.items()]
-                standings.sort(key=lambda x: x["num_approvals"], reverse=True)
-                # print(counts); print(standings)
-
+                                # print(counts); print(standings)
+                
                 return standings
 
             case _: raise Exception("Round not yet implemented")  # TODO: work on multiple round

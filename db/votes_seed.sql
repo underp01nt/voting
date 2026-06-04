@@ -7,7 +7,7 @@ CREATE TABLE elections (
     id VARCHAR(32) PRIMARY KEY NOT NULL,
     name VARCHAR(40) NOT NULL UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    target_size INTEGER NOT NULL,
+    target_sizes INTEGER[] NOT NULL,
     valid BOOLEAN NOT NULL,
     round INTEGER
 );

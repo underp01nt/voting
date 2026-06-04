@@ -272,23 +272,23 @@ def has_submitted_ballot(hashed_signature: str, election_id: str, db) -> bool:
     )
     return cursor.fetchone() is not None
 
-def count_standings(election_id: str, encrypted_ballots: list[tuple[list, int]], db):
-    counts = Counter()
-    for (encrypted_ballot,) in encrypted_ballots:
-        candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
-        for candidate_id in candidate_ids:
-            counts[candidate_id] += 1
-
-    candidate_lookup = {c["candidate_id"]: c["name"] for c in get_candidates(election_id, db)}
-    standings = [{
-                   "name": candidate_lookup[candidate_id],
-                   "candidate_id": candidate_id,
-                   "num_approvals": num_approvals, 
-                } for candidate_id, num_approvals in counts.items()]
-
-    standings.sort(key=lambda x: x["num_approvals"], reverse=True)
-
-    return standings
+# def count_standings(election_id: str, encrypted_ballots: list[tuple[list, int]], db):
+#     counts = Counter()
+#     for (encrypted_ballot,) in encrypted_ballots:
+#         candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
+#         for candidate_id in candidate_ids:
+#             counts[candidate_id] += 1
+# 
+#     candidate_lookup = {c["candidate_id"]: c["name"] for c in get_candidates(election_id, db)}
+#     standings = [{
+#                    "name": candidate_lookup[candidate_id],
+#                    "candidate_id": candidate_id,
+#                    "num_approvals": num_approvals, 
+#                 } for candidate_id, num_approvals in counts.items()]
+# 
+#     standings.sort(key=lambda x: x["num_approvals"], reverse=True)
+# 
+#     return standings
 
 def get_standings(election_id: str, round_number: int, db) -> list[dict]:
     try:
@@ -310,7 +310,25 @@ def get_standings(election_id: str, round_number: int, db) -> list[dict]:
                 standings = count_standings(election_id, encrypted_ballots, db)                
                 return standings
 
-            case _: raise Exception("Round not yet implemented")  # TODO: work on multiple round
+    except Exception: raise
+
+# each element is a collection of tiers defined by a voter
+def get_unencrypted_ballots_for_current_round(election_id: str, db) -> list[list[list[str]]]:
+    try:
+        cursor = db.cursor()
+        cursor.execute(
+            """
+                SELECT b.encrypted_ballot
+                FROM ballots b 
+                JOIN elections e on e.id = b.election_id 
+                WHERE b.election_id = %s AND b.round = e.round
+            """, (election_id, )
+        )
+        encrypted_ballots = cursor.fetchall()   # psql returns list of tuples
+        unencrypted = [json.loads(aes_decrypt(aesgcm, encrypted_ballot)) for (encrypted_ballot,) in encrypted_ballots]
+
+        return unencrypted
+    
     except Exception: raise
 
 # get the name and round number of this election

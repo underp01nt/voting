@@ -11,6 +11,7 @@ from services.processing import (
     submit_ballot,
     get_standings,
     has_submitted_ballot,
+    get_unencrypted_ballots_for_current_round,
 )
 from typing import Optional
 
@@ -121,15 +122,21 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     
-@router.get("/{election_id}/standings")
-def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
+# @router.get("/{election_id}/standings")
+# def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
+#     hashed_signature = request.session.get("hashed_signature", None)
+#     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
+#     elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
+# 
+#     return templates.TemplateResponse(
+#         request=request, 
+#         name="standings.html", 
+#         context={"standings": get_standings(election_id, round, db), "election_id": election_id, "round": round} 
+#     )
+    
+@router.get("/{election_id}/ballots")   # gets list of a collection of tiers defined by voters
+def get_ballots(request: Request, election_id: str, db=Depends(get_votes_db)) -> list[list[list[str]]]:
     hashed_signature = request.session.get("hashed_signature", None)
     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
     elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
-
-    return templates.TemplateResponse(
-        request=request, 
-        name="standings.html", 
-        context={"standings": get_standings(election_id, round, db), "election_id": election_id, "round": round} 
-    )
-    
+    return get_unencrypted_ballots_for_current_round(election_id, db)

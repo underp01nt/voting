@@ -119,7 +119,8 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
         ballot_id = submit_ballot(hashed_signature, election_id, payload.tiers, payload.round_number, db)
         request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
         
-        return {"msg": "Ballot submission successful"}
+        return {"ballot_id": ballot_id, "msg": "Ballot submission successful"}
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     
@@ -139,12 +140,16 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
 from services.processing import count_votes, get_candidates, get_target_sizes
 
 # -> list[list[list[str]]]
-@router.get("/{election_id}/ballots")   # gets list of a collection of tiers defined by voters
-def get_ballots(request: Request, election_id: str, db=Depends(get_votes_db)):
+@router.get("/{election_id}/standings")   # gets list of a collection of tiers defined by voters
+def get_ballots(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
     hashed_signature = request.session.get("hashed_signature", None)
     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
-    elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
-    
+    elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="rlly bro?")
+
+    cursor = db.cursor()
+    cursor.execute("SELECT name FROM elections WHERE id = %s", (election_id,))
+    name = cursor.fetchone()[0]
+
     candidate_map = get_candidates(election_id, db)
     results = count_votes(
         candidates=[candidate["candidate_id"] for candidate in candidate_map], 
@@ -155,10 +160,12 @@ def get_ballots(request: Request, election_id: str, db=Depends(get_votes_db)):
 
     return templates.TemplateResponse(
         request=request, 
-        name="blank.html", 
+        name="standings.html", 
         context={
             "duration": results["Partition"]["duration"], 
             "fig": results["Partition"]["fig"],
             "heat": results["Partition"]["heat"],
+            "name": name,
+            "round": round,
         } 
     )

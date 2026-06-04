@@ -22,7 +22,7 @@ def count_votes(candidates: list[str], ballots: list[list[set[str]]], target, ca
 
     processed_partition, split_indices = process_partition(ranked_partitions_result, target)
     end = time.time()
-    fig = build_rank_table(processed_partition)
+    fig = build_rank_table(processed_partition, candidate_map=candidate_map)
     heat = build_heat_map(candidates, ballots, candidate_map=candidate_map)
 
     results["Partition"] = {

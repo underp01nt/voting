@@ -74,8 +74,7 @@ def process_targets(targets: list[int], num_candidates: int) -> list[int]:
     return targets.append(diff) if diff > 0 else targets
 
 # returns election ID if election is successfully created
-def create_new_election(db, name: str, target_size: list[int]) -> str:
-def create_new_election(db, name: str, target_sizes: int) -> str:
+def create_new_election(db, name: str, target_sizes: list[int]) -> str:
     cursor = db.cursor()
 
     try:

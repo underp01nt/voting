@@ -113,3 +113,11 @@ def get_token(request: Request):
         request=request, 
         name="token.html",
     )
+
+@router.get("/test-tiers", response_class=HTMLResponse)
+def get_token(request: Request):
+    return templates.TemplateResponse(
+        request=request, 
+        name="tiers.html",
+    )
+

@@ -267,7 +267,7 @@ def has_submitted_ballot(hashed_signature: str, election_id: str, db) -> bool:
     )
     return cursor.fetchone() is not None
 
-def count_standings(enecrypted_ballots: list[tuple[list, int]], db):
+def count_standings(election_id: str, encrypted_ballots: list[tuple[list, int]], db):
     counts = Counter()
     for (encrypted_ballot,) in encrypted_ballots:
         candidate_ids = json.loads(aes_decrypt(aesgcm, encrypted_ballot))
@@ -302,8 +302,7 @@ def get_standings(election_id: str, round_number: int, db) -> list[dict]:
 
         match round_number:
             case 1: 
-                                # print(counts); print(standings)
-                
+                standings = count_standings(election_id, encrypted_ballots, db)                
                 return standings
 
             case _: raise Exception("Round not yet implemented")  # TODO: work on multiple round

@@ -36,7 +36,11 @@ class Nominee(BaseModel):
 class Ballot(BaseModel):
     candidate_ids: list[str]
     round_number: int
-    
+
+class Tiers(BaseModel):
+    tiers: list[list[str]]
+    round_number: int
+
 @router.post("/new")
 def create_new_election_route(payload: Election, db=Depends(get_votes_db)):
     try:
@@ -102,6 +106,16 @@ def submit_or_update_ballot_route(request: Request,
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
+
+@router.post("/{election_id}/tiers")
+def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Depends(get_votes_db)):
+    try:
+        hashed_signature = request.session.get("hashed_signature", None)
+        if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
+            raise HTTPException(status_code=403, detail="Not authorized for this election")
+        
+        submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
+    except: pass
     
 @router.get("/{election_id}/standings")
 def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):

@@ -5,6 +5,55 @@ let activeTierId = null;
 
 addTier();
 
+async function submitBallot(payload) {
+    const response = await fetch(`/elections/${electionId}/tiers`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    return data;
+}
+
+const submitBtn = document.getElementById("submitListBtn");
+
+submitBtn.addEventListener("click", () => {
+    const emptyTiers = tiers
+        .map((t, i) => ({index: i + 1, empty: t.candidates.length === 0}))
+        .filter(t => t.empty);
+
+    if (emptyTiers.length > 0) {
+        alert("At least one tier has no candidates.");
+        return;
+    }
+
+    const confirmed = confirm(
+        "WARNING: You cannot return to this ballot once it is submitted.\n\n" +
+        "Do you want to continue?"
+    );
+
+    if (!confirmed) return;
+
+    const payload = {
+        round_number: 1,
+        tiers: tiers.map(t => t.candidates)
+    };
+
+    (async () => {
+        try {
+            const data = await submitBallot(payload);
+            // window.location.href = "/";
+        }
+        catch (err) {
+            alert("Failed to submit ballot.");
+            console.error(err);
+        }
+    })();
+});
+
 function addTier() {
     tiers.push({
         id: crypto.randomUUID(),
@@ -148,25 +197,6 @@ function updateDropdown(tierId) {
             ${c.name}
         </div>
     `).join("");
-}
-
-function submitBallot() {
-    const emptyTiers = tiers
-        .map((t, i) => ({ index: i + 1, empty: t.candidates.length === 0 }))
-        .filter(t => t.empty);
-
-    if (emptyTiers.length > 0) {
-        const tierList = emptyTiers.map(t => `Tier ${t.index}`).join(", ");
-        alert("At least one tier is missing")
-        return;
-    }
-
-    const payload = {
-        round_number: 1,
-        tiers: tiers.map(t => t.candidates)
-    };
-
-    console.log(JSON.stringify(payload, null, 2));
 }
 
 function getAvailableCandidates(tierId, query) {

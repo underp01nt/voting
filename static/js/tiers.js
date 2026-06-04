@@ -1,4 +1,4 @@
-let candidates = [
+let candidates = [  // define this
     { id: 1, name: "Alice" },
     { id: 2, name: "Bob" },
     { id: 3, name: "Charlie" },
@@ -6,42 +6,46 @@ let candidates = [
 ];
 
 let tiers = [];
-let openSearchTier = null; // allow one search box open at a time
+let activeTierId = null;
 
 addTier();
 
 function addTier() {
     tiers.push({
         id: crypto.randomUUID(),
-        candidates: []
+        candidates: [],
+        search: ""
     });
+
+    render();
+}
+
+function removeTier(tierId) {
+    tiers = tiers.filter(t => t.id !== tierId);
+    if (activeTierId === tierId) activeTierId = null;
     render();
 }
 
 function clearAllTiers() {
     tiers = [];
+    activeTierId = null;
     render();
 }
 
-function openSearch(tierId) {
-    openSearchTier = tierId;
-    render();
-}
-
-function closeSearch() {
-    openSearchTier = null;
-    render();
+function isAssigned(candidateId) {
+    return tiers.some(t => t.candidates.includes(candidateId));
 }
 
 function addCandidateToTier(tierId, candidateId) {
     const tier = tiers.find(t => t.id === tierId);
     if (!tier) return;
 
-    // prevent duplicates across all tiers
     if (isAssigned(candidateId)) return;
 
     tier.candidates.push(candidateId);
-    closeSearch();
+    tier.search = "";
+    activeTierId = null;
+
     render();
 }
 
@@ -53,89 +57,120 @@ function removeCandidate(tierId, candidateId) {
     render();
 }
 
-function isAssigned(candidateId) {
-    return tiers.some(t => t.candidates.includes(candidateId));
+function setSearch(tierId, value) {
+    const tier = tiers.find(t => t.id === tierId);
+    if (!tier) return;
+
+    tier.search = value;
+    activeTierId = tierId;
+
+    updateDropdown(tierId);
 }
 
+function openSearch(tierId) {
+    activeTierId = tierId;
+    updateDropdown(tierId);
+}
+
+function closeSearch() {
+    activeTierId = null;
+    render();
+}
 
 function render() {
     const container = document.getElementById("tiers-container");
 
-    container.innerHTML = tiers.map((tier, index) => {
-        const isOpen = openSearchTier === tier.id;
-        const availableCandidates = candidates.filter(c =>
-            !isAssigned(c.id) || tier.candidates.includes(c.id)
-        );
-
-        return `
+    container.innerHTML = tiers.map((tier, index) => `
         <div class="cart-section" style="margin-bottom:16px;">
 
-            <!-- Tier Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; justify-content:space-between;">
                 <strong>Tier ${index + 1}</strong>
 
-                <button  onclick="removeTier('${tier.id}')">
+                <button class="btn btn-secondary"
+                        onclick="removeTier('${tier.id}')">
                     Remove
                 </button>
             </div>
 
-            <!-- Search Bar -->
             <div style="margin-top:12px; position:relative;">
+
                 <input
+                    id="search-${tier.id}"
                     class="gov-input"
                     placeholder="Search candidates..."
-                    onclick="openSearch('${tier.id}')"
-                    oninput="filterCandidates('${tier.id}', this.value)"
-                >
+                    value="${tier.search}"
+                    onfocus="openSearch('${tier.id}')"
+                    oninput="setSearch('${tier.id}', this.value)"
+                    autocomplete="off"
+                />
 
-                ${isOpen ? `
-                    <div class="gov-dropdown" style="position:relative; margin-top:5px;">
-                        ${availableCandidates.map(c => `
-                            <div class="dropdown-item"
-                                onclick="addCandidateToTier('${tier.id}', ${c.id})">
-                                ${c.name}
-                            </div>
-                        `).join("")}
-                    </div>
-                ` : ""}
+                <div
+                    id="dropdown-${tier.id}"
+                    class="gov-dropdown"
+                    style="display:none; margin-top:5px;"
+                ></div>
+
             </div>
 
-
             <div style="margin-top:12px;">
-                ${tier.candidates.map(id => {
-                    const c = candidates.find(x => x.id === id);
-                    return `
-                        <div class="ballot-item">
-                            <span>${c.name}</span>
-                            <button class="remove-btn"
-                                    onclick="removeCandidate('${tier.id}', ${id})">
-                                ×
-                            </button>
-                        </div>
-                    `;
-                }).join("")}
+                ${tier.candidates.length === 0
+                    ? `<div style="color:#666;">No candidates in this tier</div>`
+                    : tier.candidates.map(id => {
+                        const c = candidates.find(x => x.id === id);
+                        return `
+                            <div class="ballot-item">
+                                <span>${c.name}</span>
+                                <button class="remove-btn"
+                                        onclick="removeCandidate('${tier.id}', ${id})">
+                                    ×
+                                </button>
+                            </div>
+                        `;
+                    }).join("")
+                }
             </div>
 
         </div>
-        `;
-    }).join("");
+    `).join("");
 }
 
-function removeTier(tierId) {
-    tiers = tiers.filter(t => t.id !== tierId);
-    render();
-}
-function filterCandidates(tierId, query) {
-    render();
+
+function updateDropdown(tierId) {
+    const tier = tiers.find(t => t.id === tierId);
+    if (!tier) return;
+
+    const dropdown = document.getElementById(`dropdown-${tierId}`);
+    if (!dropdown) return;
+
+    const query = tier.search.toLowerCase();
+
+    const results = candidates.filter(c => {
+        const matches = c.name.toLowerCase().includes(query);
+        const available = !isAssigned(c.id) || tier.candidates.includes(c.id);
+        return matches && available;
+    });
+
+    dropdown.style.display = activeTierId === tierId ? "block" : "none";
+
+    if (results.length === 0) {
+        dropdown.innerHTML = `<div style="padding:10px;color:#666;">No candidates found</div>`;
+        return;
+    }
+
+    dropdown.innerHTML = results.map(c => `
+        <div class="dropdown-item"
+             onclick="addCandidateToTier('${tier.id}', ${c.id})"
+             style="padding:8px; cursor:pointer;">
+            ${c.name}
+        </div>
+    `).join("");
 }
 
 function submitBallot() {
     const payload = {
-        tiers: tiers.map((t, i) => ({
-            tier: i + 1,
-            candidates: t.candidates
-        }))
+        round_number: 1,
+        tiers: tiers.map(t => t.candidates)
     };
 
-// TODO: make POST request to backend, update user ballot
+    console.log(payload);
 }

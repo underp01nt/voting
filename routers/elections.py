@@ -14,6 +14,7 @@ from services.processing import (
     get_unencrypted_ballots_for_current_round,
     normalize_ballots,
     advance_election,
+    insert_simulated_ballot,
 )
 from typing import Optional
 
@@ -91,25 +92,6 @@ def nominate_candidate_route(payload: Nominee, db=Depends(get_votes_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
 
-# @router.post("/{election_id}/ballot")
-# def submit_or_update_ballot_route(request: Request, 
-#                                   payload: Ballot,
-#                                   election_id: str,
-#                                   db=Depends(get_votes_db)
-#                                   ):
-#     try:
-#         hashed_signature = request.session.get("hashed_signature", None)
-#         if not hashed_signature or not check_voter_in_election(hashed_signature, election_id, db):
-#             raise HTTPException(status_code=403, detail="Not authorized for this election")
-# 
-#         submit_ballot(hashed_signature, election_id, payload.candidate_ids, payload.round_number, db)
-#         request.session["successful_submission"] = "Ballot successfully submitted"  # successful notification toast
-# 
-#         return {"msg": "Ballot submission successful"}
-# 
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e)) from e
-
 @router.post("/{election_id}/ballot")
 def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Depends(get_votes_db)):
     try:
@@ -125,20 +107,18 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) from e
     
-# @router.get("/{election_id}/standings")
-# def get_standings_route(request: Request, election_id: str, round: int, db=Depends(get_votes_db)):
-#     hashed_signature = request.session.get("hashed_signature", None)
-#     if not hashed_signature: raise HTTPException(status_code=403, detail="Not authorized")
-#     elif not has_submitted_ballot(hashed_signature, election_id, db): raise HTTPException(status_code=403, detail="Ballot must be submitted first")
-# 
-#     return templates.TemplateResponse(
-#         request=request, 
-#         name="standings.html", 
-#         context={"standings": get_standings(election_id, round, db), "election_id": election_id, "round": round} 
-#     )
-    
-
 from services.processing import count_votes, get_candidates, get_target_sizes
+
+@router.get("/{election_id}/candidates")
+def get_candidates_route(election_id: str, db=Depends(get_votes_db)):
+    return get_candidates(election_id, db)
+
+# FOR SIMULATION PURPOSES ONLY
+@router.post("/{election_id}/simulate")
+def simulate_ballots_route(election_id: str, payload: Tiers, db=Depends(get_votes_db)):
+   import uuid
+   hashed_signature = f"SIM-{uuid.uuid4().hex}"
+   insert_simulated_ballot(hashed_signature, election_id, payload.round_number, payload.tiers, db)
 
 @router.get("/{election_id}/advance")
 def advance_election_route(election_id: str, db=Depends(get_votes_db)):

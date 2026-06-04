@@ -67,7 +67,47 @@ def advance_election(election_id: str, advancing_candidates: list[str], db):
     except Exception:
         db.rollback()
         raise
-    
+
+def insert_simulated_ballot(hashed_signature: str, election_id: str, round_number: int, tiers: list[list[str]], db):
+    import uuid
+    import json
+
+    cursor = db.cursor()
+    ballot_id = uuid.uuid4().hex[:18]
+
+    try:
+        cursor.execute(
+            """
+            INSERT INTO ballots (
+                id,
+                hashed_signature,
+                encrypted_ballot,
+                last_updated,
+                election_id,
+                round
+            )
+            VALUES (%s, %s, %s, NOW(), %s, %s)
+            ON CONFLICT (hashed_signature, election_id)
+            DO UPDATE SET
+                encrypted_ballot = EXCLUDED.encrypted_ballot,
+                last_updated = EXCLUDED.last_updated,
+                round = EXCLUDED.round
+            """,
+            (
+                ballot_id,
+                hashed_signature,
+                aes_encrypt(aesgcm, json.dumps(tiers)),
+                election_id,
+                round_number
+            )
+        )
+
+        db.commit()
+        return ballot_id
+
+    except Exception:
+        db.rollback()
+        raise
 
 # count all votes using ranked_pairs, returns results dict for template context
 def count_votes(candidates: list[str], ballots: list[list[set[str]]], target, candidate_map=None) -> dict:

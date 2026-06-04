@@ -13,6 +13,7 @@ from services.processing import (
     has_submitted_ballot,
     get_unencrypted_ballots_for_current_round,
     normalize_ballots,
+    advance_election,
 )
 from typing import Optional
 
@@ -138,6 +139,25 @@ def submit_tiers_list(request: Request, payload: Tiers, election_id: str, db=Dep
     
 
 from services.processing import count_votes, get_candidates, get_target_sizes
+
+@router.get("/{election_id}/advance")
+def advance_election_route(election_id: str, db=Depends(get_votes_db)):
+    candidate_map = get_candidates(election_id, db)
+    results = count_votes(
+        candidates=[candidate["candidate_id"] for candidate in candidate_map], 
+        ballots=normalize_ballots(get_unencrypted_ballots_for_current_round(election_id, db)),
+        target=get_target_sizes(election_id, db),
+        candidate_map=candidate_map,
+    )
+
+    next_round = results["Next Round"]
+    if next_round["to_split"] is None:
+        raise HTTPException(400, "Next round not available")
+    
+    advancing_candidates = next_round["advancing_candidates"]
+    advance_election(election_id, advancing_candidates, db)
+
+    return {"msg": "Election successfully advanced", "advancing_candidates": next_round["advancing_candidates"]}
 
 # -> list[list[list[str]]]
 @router.get("/{election_id}/standings")   # gets list of a collection of tiers defined by voters

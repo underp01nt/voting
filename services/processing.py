@@ -13,6 +13,62 @@ def parse_csv(data: bytes) -> list[list[str]]:
     reader = csv.reader(StringIO(text))
     return [row for row in reader if row]
 
+def get_advancing_candidates(processed_partition, split_indices):
+    if split_indices:
+        cutoff = split_indices[0]
+        return set().union(*processed_partition[:cutoff])
+    else:
+        return set().union(*processed_partition)
+    
+def advance_election(election_id: str, advancing_candidates: list[str], db):
+    try: 
+        cursor = db.cursor()
+        cursor.execute("SELECT round FROM elections WHERE id = %s", (election_id,))
+        row = cursor.fetchone()
+
+        if not row: raise ValueError("Election not found")
+        else: current_round = row[0]
+
+        # increment the round
+        cursor.execute(
+            """
+                UPDATE elections
+                SET round = round + 1
+                WHERE id = %s
+            """,
+            (election_id,)
+        )
+
+        # flush out relevant ballot payloads
+        cursor.execute(
+            """
+                UPDATE ballots
+                SET encrypted_ballot = NULL, last_updated = NULL
+                WHERE election_id = %s
+                AND round = %s
+            """,
+            (election_id, current_round)
+        )
+
+        # eliminate candidates who didnt make the cut
+        cursor.execute(
+            """
+                UPDATE election_candidates
+                SET round_eliminated = %s
+                WHERE election_id = %s 
+                AND candidate_id <> ALL(%s) 
+                AND round_eliminated IS NULL
+            """,
+            (current_round, election_id, tuple(advancing_candidates))
+        )
+
+        db.commit()
+
+    except Exception:
+        db.rollback()
+        raise
+    
+
 # count all votes using ranked_pairs, returns results dict for template context
 def count_votes(candidates: list[str], ballots: list[list[set[str]]], target, candidate_map=None) -> dict:
     results = {}
@@ -31,8 +87,11 @@ def count_votes(candidates: list[str], ballots: list[list[set[str]]], target, ca
         "heat": heat.to_html(full_html=False, config={"responsive": True})
     }
     
+    advancing_candidates = get_advancing_candidates(processed_partition, split_indices)
+
     results["Next Round"] = {
-        "to_split": split_indices[0] if split_indices else None
+        "to_split": split_indices[0] if split_indices else None,
+        "advancing_candidates": list(advancing_candidates),
     }
 
     return results

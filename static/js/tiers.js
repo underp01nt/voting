@@ -32,15 +32,9 @@ function clearAllTiers() {
     render();
 }
 
-function isAssigned(candidateId) {
-    return tiers.some(t => t.candidates.includes(candidateId));
-}
-
 function addCandidateToTier(tierId, candidateId) {
     const tier = tiers.find(t => t.id === tierId);
     if (!tier) return;
-
-    if (isAssigned(candidateId)) return;
 
     tier.candidates.push(candidateId);
     tier.search = "";
@@ -134,7 +128,6 @@ function render() {
     `).join("");
 }
 
-
 function updateDropdown(tierId) {
     const tier = tiers.find(t => t.id === tierId);
     if (!tier) return;
@@ -144,11 +137,7 @@ function updateDropdown(tierId) {
 
     const query = tier.search.toLowerCase();
 
-    const results = candidates.filter(c => {
-        const matches = c.name.toLowerCase().includes(query);
-        const available = !isAssigned(c.id) || tier.candidates.includes(c.id);
-        return matches && available;
-    });
+    const results = getAvailableCandidates(tier.id, tier.search);
 
     dropdown.style.display = activeTierId === tierId ? "block" : "none";
 
@@ -167,10 +156,40 @@ function updateDropdown(tierId) {
 }
 
 function submitBallot() {
+    const emptyTiers = tiers
+        .map((t, i) => ({ index: i + 1, empty: t.candidates.length === 0 }))
+        .filter(t => t.empty);
+
+    if (emptyTiers.length > 0) {
+        const tierList = emptyTiers.map(t => `Tier ${t.index}`).join(", ");
+        alert("At least one tier is missing")
+        return;
+    }
+
     const payload = {
         round_number: 1,
         tiers: tiers.map(t => t.candidates)
     };
 
-    console.log(payload);
+    console.log(JSON.stringify(payload, null, 2));
 }
+
+function getAvailableCandidates(tierId, query) {
+    const tier = tiers.find(t => t.id === tierId);
+    if (!tier) return [];
+
+    const q = query.toLowerCase();
+
+    return candidates.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(q);
+
+        const notInThisTier = !tier.candidates.includes(c.id);
+
+        const notUsedElsewhere = !tiers.some(t =>
+            t.id !== tierId && t.candidates.includes(c.id)
+        );
+
+        return matchesSearch && notInThisTier && notUsedElsewhere;
+    });
+}
+

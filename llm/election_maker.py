@@ -30,15 +30,17 @@ def run_planner(user_input: str):
     election_name = response["election_name"]
     description = response["description"]
     candidates = response["candidates"]
-    target_size = response["target_size"]
+    target_sizes = response["target_sizes"]
 
-    process_election(election_name, candidates, int(target_size))
+    print(target_sizes)
+    process_election(election_name, candidates, target_sizes)
+    
 
     return {
         "election_name": election_name,
         "description": description,
         "candidates": candidates,
-        "target_size": target_size,
+        "target_size": target_sizes,
     }
 
 if __name__ == "__main__":

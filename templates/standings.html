@@ -4,55 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
-    <title>Election Standings - Project AIR</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <title>Election Analysis - Project AIR</title>
 </head>
 
 <body>
     <div class="auth-container">
-        <div class="auth-card ballot-card">
+        <div class="auth-card ballot-card analysis-card">
 
             <div class="cast-meta">
-                <div class="election-meta">
-                <div><strong>Election ID: {{ election_id }}</strong></div>
-                <div class="election-id"></div>
-
-                <div class="round-label">
-                    Round {{ round }}
+                <div>
+                    <strong> {{ name }} | Round {{ round }}</strong>
                 </div>
-            </div>
 
-                {% if last_updated %}
                 <div class="last-updated">
-                    Last updated: {{ last_updated }}
+                    Computed in {{ "%.3f"|format(duration) }} seconds
                 </div>
-                {% endif %}
             </div>
 
-            <h1>Current Standings</h1>
-            <div class="standings-container">
-                <table class="standings-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Candidate</th>
-                            <th>Candidate ID</th>
-                            <th class="approvals-col">Approvals</th>
-                        </tr>
-                    </thead>
+            <h1>Ranked Partition Results</h1>
+            <p class="subtitle">
+                Pairwise comparison analysis and resulting candidate partition.
+            </p>
 
-                    <tbody>
-                        {% for candidate in standings %}
-                        <tr {% if loop.first %}class="leader-row"{% endif %}>
-                            <td>{{ loop.index }}</td>
-                            <td class="candidate-name">{{ candidate.name }}</td>
-                            <td class="candidate-id">{{ candidate.candidate_id }}</td>
-                            <td class="approvals-col">{{ candidate.num_approvals }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <hr class="gov-divider">
+
+            <div class="analysis-grid">
+                <div class="analysis-panel heatmap-panel">
+                    <h2>Pairwise Heat Map</h2>
+                    <div class="chart-container">
+                        {{ heat | safe }}
+                    </div>
+                </div>
+
+                <div class="analysis-panel ranking-panel">
+                    <h2>Final Ranking</h2>
+                    <div class="chart-container ranking-container">
+                        {{ fig | safe }}
+                    </div>
+                </div>
             </div>
-            <br>
+
             <div class="auth-footer">
                 <a href="/" class="back-link">
                     ← Go back

@@ -176,10 +176,13 @@ def ranked_partitions(alternatives:list, votes:list[list]):
     return output
 
 def ranked_partitions_with_margins(alternatives:list, votes:list[list]) -> list[set]:
-    # Parse string
+    # Parse string and lists into sets for easier processing
     if type(votes[0][0]) == str:
         for i in range(len(votes)):
             votes[i] = [set(part.split(",")) for part in votes[i]]
+    if type(votes[0][0]) == list:
+        for i in range(len(votes)):
+            votes[i] = [set(part) for part in votes[i]]
     
     pairs_ = pairwise_comparison(alternatives, votes)
     # pairs = pairs_.copy()

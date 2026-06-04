@@ -69,8 +69,12 @@ def insert_or_get_ballot(db, hashed_signature: str, encrypted_ballot=None, elect
 
     db.commit()
 
+def process_targets(targets: list[int], num_candidates: int) -> list[int]:
+    diff = num_candidates - sum(targets)
+    return targets.append(diff) if diff > 0 else targets
+
 # returns election ID if election is successfully created
-def create_new_election(db, name: str, target_size: int) -> str:
+def create_new_election(db, name: str, target_size: list[int]) -> str:
     cursor = db.cursor()
 
     try:

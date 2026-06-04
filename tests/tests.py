@@ -88,33 +88,8 @@ def partition_trials(A=500, V=25, target=[50,10]):
     wins = {(u,v):pairs[(u,v)] for u,v in pairs.keys() if pairs[(u,v)] > pairs[(v,u)]}
     # cycles = ranked_partitions(alternatives, votes)
 
-    cycles = ranked_partitions(alternatives, votes)
-    cyclesm = timed_ranked_partitions_with_margins(alternatives, votes)
 
-    # print(sorted(wins.values(),reverse=True))
-    print("Simple Condorcet:")
-    for cycle in pairwise_partition(alternatives, votes):
-        print(f"--------------------\n{min(score[a] for a in cycle):.6f} : {cycle}")
-    print()
-
-    # print()
-    # print("Weighted Condorcet: ")
-    # for cycle in weighted_pairwise_partition(alternatives, votes):
-    #     print(f"{min(score[a] for a in cycle)} : {cycle}")
-
-    print("Ranked Partitions: ")
-    for cycle in cycles:
-        print(f"--------------------\n{min(score[a] for a in cycle):.3f}, {len(cycle)} : {cycle}")
-    print()
-
-
-    print("Ranked Partitions w/ Margins: ")
-    for cycle in cyclesm:
-        print(f"--------------------\n{min(score[a] for a in cycle):.3f}, {len(cycle)} : {cycle}")
-    print()   
-    # exit()
-
-    cycles = cyclesm
+    cycles = ranked_partitions_with_margins(alternatives, votes)
     # for cycle in cycles:
     #     print(cycle)
     # print()
@@ -174,8 +149,7 @@ def partition_trials(A=500, V=25, target=[50,10]):
     #     print(f"--------------------\n{min(score[a] for a in cycle):.6f} : {cycle}")
     # print()
 
-    exit()
-
+def partition_trials_dataframe():
     trials = pd.DataFrame(columns=["Trial", "Alternatives", "Votes", "Cycles"])
     strata = []
 
@@ -207,10 +181,39 @@ def partition_trials(A=500, V=25, target=[50,10]):
     # trials.to_csv("./data/partitions/weighted_trials.csv", index=False)
     # trial_strata.to_csv("./data/partitions/weighted_strata.csv", index=False)\
 
+def condorcet_rp_rparts_comparison(alternatives, votes):
+    pairs = pairwise_comparison(alternatives, votes)
+    # wins = {(u,v):pairs[(u,v)] for u,v in pairs.keys() if pairs[(u,v)] > pairs[(v,u)]}
+
+    cycles_rp = ranked_partitions(alternatives, votes)
+    cycles_rparts = ranked_partitions_with_margins(alternatives, votes)
+
+    print("Simple Condorcet:")
+    i = 1
+    for cycle in pairwise_partition(alternatives, votes):
+        print(f"--------------------\nTier {i}, {len(cycle)} : {cycle}")
+        i += 1
+    print()
+
+    print("Ranked Partitions: ")
+    i = 1
+    for cycle in cycles_rp:
+        print(f"--------------------\nTier {i}, {len(cycle)} : {cycle}")
+        i += 1
+    print()
+
+
+    print("Ranked Partitions w/ Margins: ")
+    i = 1
+    for cycle in cycles_rparts:
+        print(f"--------------------\nTier {i}, {len(cycle)} : {cycle}")
+        i += 1
+    print()
+
 if __name__ == "__main__":
-    # ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
+    ranked_pairs_ranked_partitions_equivalence(2,10,20,100)
     
-    print(ranked_partitions_with_margins(['A', 'B', 'C', 'D'], [['A,B', 'C,D'], ['A', 'B', 'C', 'D'], ['B,D', 'A', 'C'], ['B', 'A,D,C'], ['C', 'D', 'A', 'B']]))
+    # print(ranked_partitions_with_margins(['A', 'B', 'C', 'D'], [['A,B', 'C,D'], ['A', 'B', 'C', 'D'], ['B,D', 'A', 'C'], ['B', 'A,D,C'], ['C', 'D', 'A', 'B']]))
     # ranked_pairs_ranked_partitions_equivalence()
     
     # pairs = pairwise_margins(

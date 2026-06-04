@@ -31,7 +31,7 @@ def build_rank_table(ranking: list[set]) -> go.Figure:
     display_ranking = [", ".join(sorted(group)) for group in ranking]
 
     fig = go.Figure(data=go.Table(
-        header=dict(values=["Rank", "Candidate"]),
+        header=dict(values=["Rank", "Candidates"]),
         cells=dict(values=[list(rank_indices), display_ranking])
     ))
 

@@ -71,6 +71,7 @@ def simulate_ballots(candidates: list[str], voter_count: int) -> list[list[list[
 
 def run_simulation(election_id: str, voter_count: int):
     candidates = get_active_candidate_ids(election_id)
+    print(candidates)
     ballots = simulate_ballots(candidates, voter_count); print(ballots)
     round_number = 1
 
@@ -82,12 +83,8 @@ def run_simulation(election_id: str, voter_count: int):
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 if __name__ == "__main__":
-
-    run_simulation("3912bf6361", 1)
-
-    """"
     parser = argparse.ArgumentParser()
-    parser.add_argument("identity")   # name of Election, Candidate, or Voter hashed signature
+    parser.add_argument("identity")   # name of Election, Candidate, Voter hashed signature or Election ID (simulation only)
 
     # create new election
     parser.add_argument("-make", action="store_true")
@@ -97,11 +94,14 @@ if __name__ == "__main__":
     parser.add_argument("-register", action="store_true")
     # nominate a candidate/representative for a specific election
     parser.add_argument("-nominate", action="store_true")
+    # simulate a single round of an election
+    parser.add_argument("-simulate", action="store_true")
 
     # params
     parser.add_argument("--target-sizes", type=str)
     parser.add_argument("--election-id", type=str)
     parser.add_argument("--candidate-id", type=str)
+    parser.add_argument("--voter-count", type=int)
 
     args = parser.parse_args()
 
@@ -109,4 +109,4 @@ if __name__ == "__main__":
     elif args.candidate: add_new_candidate(args.identity)
     elif args.register: register_voter(args.identity, args.election_id)
     elif args.nominate: nominate_candidate(args.identity, args.election_id)
-    """
+    elif args.simulate: run_simulation(args.identity, args.voter_count)

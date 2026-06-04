@@ -23,7 +23,7 @@ You MUST respond with exactly one JSON object
    “election_name”: ...,
    “description”: ...,
    “candidates”: [...],
-   "target_size": ...,
+   "target_sizes": [...],
 }
 
 Rules:
@@ -43,24 +43,22 @@ Rules:
 - Names must be unique
 - Names must be relevant to the theme
 - Names must be less than 40 characters
-- Generate at least 4 candidates, no more than 10 candidates
-- candidate count must always be greater than target_size
+- Generate at least 4 candidates, no more than 8 candidates
 
-3. target_size
-- Set the value based on user specification
-- If not provided, default to 2
+3. target_sizes
+- Set the list of integers based on user specification
 
 ---
 
 ## Intepretation and response example
 
 User input:
-> Create a 2020 U.S. Presidential Election with a target size of 1
+> Create a 2020 U.S. Presidential Election with target sizes [1, 2, 4]
 
 Interpretation:
 - name: "United States Presidential Election of 2020"
 - theme: U.S. Politics
-- target_size: 1
+- target_sizes: [1, 2, 4]
 
 Response:
 {
@@ -72,5 +70,5 @@ Response:
 "Jo Jorgensen",
 "Howie Hawkins"
 ],
-"target_size: 2
+"target_sizes": [1, 2, 4]
 }

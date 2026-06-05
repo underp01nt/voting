@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Dashboard - Project AIR</title>
+</head>
+<body>
+    {% if successful_submission %}
+        <div id="toast" class="toast-success">
+            <span>✓ {{ successful_submission }}</span>
+            <button class="toast-close" onclick="closeToast()">&times;</button>
+        </div>
+    {% endif %}
+
+    <div class="dashboard-container">
+        <div class="dashboard-topbar">
+            <span class="topbar-brand">Project <span>AIR</span></span>
+            <div class="topbar-right">
+                <a href="/logout" class="back-link">Sign out</a>
+            </div>
+        </div>
+ 
+        <div class="dashboard-body">
+            <h1>Dashboard</h1>
+            <hr class="gov-divider">
+ 
+            <div class="section-header">
+                <h2>Active Elections</h2>
+                <span class="section-count">{{ active_elections | length }}</span>
+            </div>
+ 
+            {% for election in active_elections %}
+            <div class="election-card">
+                <div class="election-info">
+                    <p class="election-title">{{ election.name }} — Round {{ election.round }}</p>
+                    <p class="election-meta">Opened {{ election.created_at }} &nbsp;•&nbsp; {{ election.count }} candidates on ballot</p>
+                    <span class="status-pill active">
+                        <span class="status-dot"></span>
+                        IN PROGRESS
+                    </span>
+                </div>
+                <!-- TODO: implement election-aware cast and standings route-->
+                <div class="election-actions">
+                    <a href="/cast-tiers?id={{ election.id }}" class="btn-cast">Go to ballot →</a>
+                    {% if election.last_updated %}
+                        <a href="/elections/{{ election.id }}/standings?round={{ election.round}}"
+                        class="btn-standings">
+                            View Current Standings
+                        </a>
+                    {% else %}
+                        <span class="btn-standings btn-standings-disabled"
+                            title="Ballot must be submitted first to view standings">
+                            View Current Standings
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!---
+            <div class="section-header">
+                <h2>Closed Elections</h2>
+                <span class="section-count" style="background: #71767a;">1</span>
+            </div>
+ 
+            <div class="election-card closed">
+                <div class="election-info">
+                    <p class="election-title">Expired</p>
+                    <p class="election-meta">Closed May 1, 2026</p>
+                    <span class="status-pill closed">
+                        <span class="status-dot"></span>
+                        Closed
+                    </span>
+                </div>
+                <div class="election-actions">
+                    <span class="btn-cast disabled">Voting closed</span>
+                </div>
+            </div>
+            ---->
+        </div>
+    </div>
+</body>
+<script>
+    function closeToast() { document.getElementById("toast").remove(); }
+</script>
+</html>

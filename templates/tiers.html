@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="/static/style.css">
+        <script src="/static/js/tiers.js" defer></script>
+        <script>
+            const candidates = {{ all_candidates|tojson }};
+            const electionId = "{{ election_id }}";
+        </script>
+        
+        <title>Tiered Ballot</title>
+    </head>
+
+    <body>
+        <div class="auth-container">
+            <div class="auth-card ballot-card">
+                <div class="cast-meta">
+                    <div><strong>{{ election_name }} | Round {{ round_number }}</strong></div>
+                </div>
+
+                <h1>Create Ranked Tiers</h1>
+                <p class="subtitle">Add candidates to ranked tiers. Lowest tier is of higher preference.</p>
+
+                <hr class="gov-divider">
+
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                    <button class="btn btn-secondary btn-small" onclick="addTier()">+ Add a tier</button>
+                    <button class="btn btn-secondary btn-small" onclick="clearAllTiers()">Clear all tiers</button>
+                </div>
+
+                <div id="tiers-container"></div>
+
+                <div class="auth-footer" style="display:flex; justify-content:space-between; margin-top:20px;">
+                    <a href="/" class="back-link" onclick="return confirm('Unsaved changes will be lost. Continue?')">← Go back</a>
+
+                    <button class="btn btn-primary"
+                            id="submitListBtn"
+                            style="border-radius:999px; padding:10px 24px;">
+                        Submit Ballot
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </body>
+</html>

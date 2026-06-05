@@ -1,0 +1,57 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js" defer></script>
+    <script src="/static/js/token.js" defer></script>
+    <title>Generate Token - Project AIR</title>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card token-card" id="tokenCard">
+            <div id="generationView">
+                <h1>Registration Complete</h1>
+                <p class="subtitle">
+                    Your eligibility has been verified successfully.
+                </p>
+                <hr class="gov-divider">
+                <div class="token-section">
+                    <div class="token-icon">
+                        <img src="/static/key-icon.svg" height="58">
+                    </div>
+                    <button id="generateTokenBtn" class="btn btn-primary btn-wide token-btn">
+                        Generate Anonymous Token
+                    </button>
+
+                    <p class="token-note">
+                        This process creates a cryptographic token within
+                        your web browser for anonymous ballot access.
+                    </p>
+                </div>
+            </div>
+            <div id="tokenResultView" class="hidden">
+                <h1>Anonymous Token Generated</h1>
+                <p class="subtitle">
+                    Store this token securely for election access.
+                </p>
+                <hr class="gov-divider">
+                <div class="generated-token-box">
+                    <div id="generatedToken" class="generated-token"></div>
+                </div>
+                <button id="copyTokenBtn" class="btn btn-secondary btn-wide copy-btn">
+                    Copy token
+                </button>
+                
+                <button id="downloadQrBtn" class="btn btn-secondary btn-wide copy-btn">
+                    Download QR Code
+                </button>
+
+                <button id="continueBtn"class="btn btn-primary btn-wide">
+                    Continue
+                </button>
+            </div>        
+        </div>
+    </div>
+</body>
+</html>

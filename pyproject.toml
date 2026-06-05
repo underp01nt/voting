@@ -1,14 +1,29 @@
+[build-system]
+requires = ["setuptools>=62"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "project-air"
 version = "0.0.1"
 requires-python = ">=3.10"
 dependencies = [
-    "numpy", 
+    "numpy",
     "pandas",
     "matplotlib",
     "networkx",
-
-    "fastapi>=0.112.0",
+    "fastapi[standard]>=0.112.0",
     "uvicorn",
     "jinja2",
+    "plotly",
+    "psycopg2-binary",
+    "requests",
+    "python-dotenv",
+    "itsdangerous",   # FastAPI session middleware dependency
+    "pydantic",
+    "cryptography",
 ]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["db*", "routers*", "services*"]
+exclude = ["data*", "static*", "templates*"]

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <title>Election Analysis - Project AIR</title>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card ballot-card analysis-card">
+
+            <div class="cast-meta">
+                <div>
+                    <strong> {{ name }} | Round {{ round }}</strong>
+                </div>
+
+                <div class="last-updated">
+                    Computed in {{ "%.3f"|format(duration) }} seconds
+                </div>
+            </div>
+
+            <h1>Ranked Partition Results</h1>
+            <p class="subtitle">
+                Pairwise comparison analysis and resulting candidate partition.
+            </p>
+
+            <hr class="gov-divider">
+
+            <div class="analysis-grid">
+                <div class="analysis-panel heatmap-panel">
+                    <h2>Pairwise Heat Map</h2>
+                    <div class="chart-container">
+                        {{ heat | safe }}
+                    </div>
+                </div>
+
+                <div class="analysis-panel ranking-panel">
+                    <h2>Final Ranking</h2>
+                    <div class="chart-container ranking-container">
+                        {{ fig | safe }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="auth-footer">
+                <a href="/" class="back-link">
+                    ← Go back
+                </a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
